@@ -6,266 +6,117 @@
 <title>Die Unendliche Sammlung</title>
 <style>
 :root {
-  --bg: #0f0f1a;
-  --card: #1a1a2e;
-  --accent: #6c5ce7;
-  --text: #e0e0ff;
-  --common: #aaaaaa;
-  --uncommon: #55ff55;
-  --rare: #5555ff;
-  --epic: #aa55ff;
-  --legendary: #ffaa00;
-  --mythic: #ff5555;
-  --divine: #ffff55;
-  --cosmic: #55ffff;
-  --transcendent: #ff55ff;
-  --absolute: #ffffff;
-  --primordial: #ff00ff;
+  --bg: #0f0f1a; --card: #1a1a2e; --accent: #6c5ce7; --text: #e0e0ff;
+  --common: #aaaaaa; --uncommon: #55ff55; --rare: #5555ff; --epic: #aa55ff;
+  --legendary: #ffaa00; --mythic: #ff5555; --divine: #ffff55; --cosmic: #55ffff;
+  --transcendent: #ff55ff; --absolute: #ffffff; --primordial: #ff00ff; --jenseits: #ffd700;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  background: linear-gradient(135deg, #0f0f1a 0%, #1a0a2e 100%);
-  color: var(--text);
-  min-height: 100vh;
-  padding: 20px;
-}
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg, #0f0f1a 0%, #1a0a2e 100%); color: var(--text); min-height: 100vh; padding: 15px; }
 .container { max-width: 1200px; margin: 0 auto; }
-header {
-  text-align: center;
-  margin-bottom: 30px;
-  padding: 20px;
-  background: rgba(26,26,46,0.8);
-  border-radius: 16px;
-  border: 1px solid #333;
-}
-h1 {
-  font-size: 2.5rem;
-  background: linear-gradient(90deg, #6c5ce7, #a29bfe);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 10px;
-}
-.subtitle { color: #aaa; font-size: 1.1rem; }
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-  margin: 25px 0;
-}
-.stat-card {
-  background: var(--card);
-  padding: 15px;
-  border-radius: 12px;
-  text-align: center;
-  border: 1px solid #333;
-}
-.stat-card h3 { font-size: 0.9rem; color: #aaa; margin-bottom: 5px; }
-.stat-card .value { font-size: 1.6rem; font-weight: bold; color: var(--accent); }
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  justify-content: center;
-  margin: 30px 0;
-}
-button {
-  padding: 16px 32px;
-  font-size: 1.2rem;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-weight: 600;
-}
-.search-btn {
-  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-  color: white;
-  min-width: 200px;
-  box-shadow: 0 4px 15px rgba(108,92,231,0.4);
-}
-.search-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(108,92,231,0.6); }
-.search-btn:active { transform: translateY(0); }
-.auto-btn {
-  background: #2d2d4a;
-  color: var(--text);
-  border: 1px solid #444;
-}
+header { text-align: center; margin-bottom: 20px; padding: 15px; background: rgba(26,26,46,0.85); border-radius: 16px; border: 1px solid #333; }
+h1 { font-size: 2.2rem; background: linear-gradient(90deg, #6c5ce7, #a29bfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.subtitle { color: #aaa; font-size: 1rem; margin-top: 5px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 20px 0; }
+.stat-card { background: var(--card); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid #333; }
+.stat-card h3 { font-size: 0.8rem; color: #aaa; }
+.stat-card .value { font-size: 1.4rem; font-weight: bold; color: var(--accent); }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 20px 0; }
+button { padding: 12px 22px; font-size: 1rem; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-weight: 600; }
+.search-btn { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; min-width: 160px; box-shadow: 0 4px 15px rgba(108,92,231,0.4); }
+.search-btn:hover { transform: translateY(-2px); }
+.auto-btn, .inv-btn, .ach-btn, .upg-btn, .bio-btn { background: #2d2d4a; color: var(--text); border: 1px solid #444; }
 .auto-btn.active { background: #00b894; color: white; }
-.inv-btn { background: #2d2d4a; color: var(--text); border: 1px solid #444; }
-.recent-finds {
-  margin: 30px 0;
-  min-height: 100px;
-}
-.find-card {
-  background: var(--card);
-  border-radius: 12px;
-  padding: 15px 20px;
-  margin: 10px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-left: 5px solid;
-  animation: slideIn 0.4s ease-out;
-  transition: transform 0.2s;
-}
-.find-card:hover { transform: translateX(5px); }
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.rarity-badge {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-.modal {
-  display: none;
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.85);
-  z-index: 1000;
-  justify-content: center;
-  align-items: center;
-}
+.recent-finds { margin: 20px 0; }
+.find-card { background: var(--card); border-radius: 12px; padding: 12px 16px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid; animation: slideIn 0.4s ease-out; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
+.rarity-badge { padding: 3px 10px; border-radius: 16px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 1000; justify-content: center; align-items: center; }
 .modal.active { display: flex; }
-.modal-content {
-  background: var(--card);
-  border-radius: 16px;
-  width: 90%;
-  max-width: 900px;
-  max-height: 85vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #444;
-}
-.modal-header {
-  padding: 20px;
-  border-bottom: 1px solid #333;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.modal-body {
-  padding: 20px;
-  overflow-y: auto;
-  flex: 1;
-}
-.inventory-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
-}
-.inv-item {
-  background: #252540;
-  border-radius: 10px;
-  padding: 12px;
-  border-left: 4px solid;
-  font-size: 0.95rem;
-}
-.inv-item .name { font-weight: 600; margin-bottom: 4px; }
-.inv-item .meta { font-size: 0.8rem; color: #aaa; }
-.close-btn {
-  background: #e74c3c;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-}
-.filter-bar {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 15px;
-}
-.filter-btn {
-  padding: 6px 14px;
-  font-size: 0.85rem;
-  border-radius: 20px;
-  background: #2d2d4a;
-  color: var(--text);
-  border: 1px solid #444;
-}
-.filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+.modal-content { background: var(--card); border-radius: 16px; width: 92%; max-width: 950px; max-height: 88vh; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #444; }
+.modal-header { padding: 16px 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+.modal-body { padding: 16px; overflow-y: auto; flex: 1; }
+.inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.inv-item { background: #252540; border-radius: 10px; padding: 10px; border-left: 4px solid; font-size: 0.9rem; }
+.inv-item .name { font-weight: 600; margin-bottom: 3px; }
+.inv-item .meta { font-size: 0.75rem; color: #aaa; }
+.close-btn { background: #e74c3c; color: white; padding: 6px 14px; border-radius: 8px; }
+.filter-bar, .tab-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.filter-btn, .tab-btn { padding: 5px 12px; font-size: 0.8rem; border-radius: 16px; background: #2d2d4a; color: var(--text); border: 1px solid #444; cursor: pointer; }
+.filter-btn.active, .tab-btn.active { background: var(--accent); color: white; }
 .glow { animation: glow 1.5s ease-in-out infinite alternate; }
-@keyframes glow {
-  from { box-shadow: 0 0 5px currentColor; }
-  to { box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
-}
-.notification {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #00b894;
-  color: white;
-  padding: 15px 25px;
-  border-radius: 10px;
-  transform: translateX(400px);
-  transition: transform 0.4s;
-  z-index: 2000;
-  font-weight: 600;
-}
+@keyframes glow { from { box-shadow: 0 0 5px currentColor; } to { box-shadow: 0 0 18px currentColor; } }
+.notification { position: fixed; top: 15px; right: 15px; background: #00b894; color: white; padding: 12px 20px; border-radius: 10px; transform: translateX(400px); transition: transform 0.4s; z-index: 2000; font-weight: 600; max-width: 320px; }
 .notification.show { transform: translateX(0); }
-.reset-btn {
-  background: transparent;
-  color: #e74c3c;
-  border: 1px solid #e74c3c;
-  font-size: 0.9rem;
-  padding: 8px 16px;
-}
+.reset-btn { background: transparent; color: #e74c3c; border: 1px solid #e74c3c; font-size: 0.85rem; padding: 8px 14px; }
+.biome-select, .upgrade-item { background: #252540; border-radius: 10px; padding: 12px; margin: 8px 0; border: 1px solid #444; cursor: pointer; }
+.biome-select.active { border-color: var(--accent); background: #2a2a50; }
+.progress-bar { height: 8px; background: #333; border-radius: 4px; margin-top: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); transition: width 0.3s; }
+.search-box { width: 100%; padding: 8px 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #444; background: #1a1a2e; color: var(--text); }
 </style>
 </head>
 <body>
 <div class="container">
   <header>
     <h1>Die Unendliche Sammlung</h1>
-    <p class="subtitle">Sammle gewöhnliche bis absolut seltene Artefakte. Einige erfordern Wochen des Grindens!</p>
+    <p class="subtitle">Sammle gewöhnliche bis jenseits-seltene Artefakte. Biome, Level, Achievements & mehr!</p>
+    <div style="margin-top:10px; font-size:0.9rem; color:#aaa;">Level <span id="player-level">1</span> • Glück: <span id="luck-mult">1.00</span>x • Biome: <span id="current-biome">Wald</span></div>
   </header>
 
   <div class="stats">
-    <div class="stat-card">
-      <h3>Suchen</h3>
-      <div class="value" id="total-searches">0</div>
-    </div>
-    <div class="stat-card">
-      <h3>Gefundene Items</h3>
-      <div class="value" id="total-items">0</div>
-    </div>
-    <div class="stat-card">
-      <h3>Einzigartige</h3>
-      <div class="value" id="unique-items">0</div>
-    </div>
-    <div class="stat-card">
-      <h3>Seltenstes</h3>
-      <div class="value" id="rarest-item" style="font-size:1.1rem;">-</div>
-    </div>
+    <div class="stat-card"><h3>Suchen</h3><div class="value" id="total-searches">0</div></div>
+    <div class="stat-card"><h3>Gefundene Items</h3><div class="value" id="total-items">0</div></div>
+    <div class="stat-card"><h3>Einzigartige</h3><div class="value" id="unique-items">0</div></div>
+    <div class="stat-card"><h3>Seltenstes</h3><div class="value" id="rarest-item" style="font-size:1rem;">-</div></div>
+    <div class="stat-card"><h3>XP</h3><div class="value" id="xp-display">0</div><div class="progress-bar"><div class="progress-fill" id="xp-bar" style="width:0%"></div></div></div>
   </div>
 
   <div class="controls">
-    <button class="search-btn" id="search-btn">🔍 Suchen</button>
+    <button class="search-btn" id="search-btn">🔍 Suchen (x<span id="search-power">1</span>)</button>
     <button class="auto-btn" id="auto-btn">Auto-Suche: AUS</button>
+    <button class="bio-btn" id="bio-btn">🌍 Biome</button>
     <button class="inv-btn" id="inv-btn">📦 Inventar</button>
-    <button class="reset-btn" id="reset-btn">Fortschritt zurücksetzen</button>
+    <button class="ach-btn" id="ach-btn">🏆 Achievements</button>
+    <button class="upg-btn" id="upg-btn">⬆️ Upgrades</button>
+    <button class="reset-btn" id="reset-btn">Reset</button>
   </div>
 
   <div class="recent-finds">
-    <h2 style="margin-bottom:15px; color:#aaa;">Letzte Funde</h2>
+    <h2 style="margin-bottom:10px; color:#aaa; font-size:1.1rem;">Letzte Funde</h2>
     <div id="recent-list"></div>
   </div>
 </div>
 
 <div class="modal" id="inventory-modal">
   <div class="modal-content">
-    <div class="modal-header">
-      <h2>Inventar</h2>
-      <button class="close-btn" id="close-modal">Schließen</button>
-    </div>
+    <div class="modal-header"><h2>Inventar</h2><button class="close-btn" data-close>Schließen</button></div>
     <div class="modal-body">
+      <input class="search-box" id="inv-search" placeholder="Item suchen..." />
       <div class="filter-bar" id="filter-bar"></div>
       <div class="inventory-grid" id="inventory-grid"></div>
     </div>
+  </div>
+</div>
+
+<div class="modal" id="ach-modal">
+  <div class="modal-content">
+    <div class="modal-header"><h2>Achievements</h2><button class="close-btn" data-close>Schließen</button></div>
+    <div class="modal-body" id="ach-list"></div>
+  </div>
+</div>
+
+<div class="modal" id="upg-modal">
+  <div class="modal-content">
+    <div class="modal-header"><h2>Upgrades</h2><button class="close-btn" data-close>Schließen</button></div>
+    <div class="modal-body" id="upg-list"></div>
+  </div>
+</div>
+
+<div class="modal" id="bio-modal">
+  <div class="modal-content">
+    <div class="modal-header"><h2>Biome</h2><button class="close-btn" data-close>Schließen</button></div>
+    <div class="modal-body" id="bio-list"></div>
   </div>
 </div>
 
@@ -273,44 +124,63 @@ button {
 
 <script>
 const rarities = [
-  { name: 'Gewöhnlich', chance: 0.45, color: '#aaaaaa', weight: 1 },
-  { name: 'Ungewöhnlich', chance: 0.28, color: '#55ff55', weight: 2 },
-  { name: 'Selten', chance: 0.15, color: '#5555ff', weight: 3 },
-  { name: 'Episch', chance: 0.07, color: '#aa55ff', weight: 4 },
-  { name: 'Legendär', chance: 0.03, color: '#ffaa00', weight: 5 },
-  { name: 'Mythisch', chance: 0.012, color: '#ff5555', weight: 6 },
-  { name: 'Göttlich', chance: 0.005, color: '#ffff55', weight: 7 },
-  { name: 'Kosmisch', chance: 0.0018, color: '#55ffff', weight: 8 },
-  { name: 'Transzendent', chance: 0.0006, color: '#ff55ff', weight: 9 },
-  { name: 'Absolut', chance: 0.00005, color: '#ffffff', weight: 10 },
-  { name: 'Primordial', chance: 0.000008, color: '#ff00ff', weight: 11 },
-  { name: 'Unendlich', chance: 0.000001, color: '#00ffff', weight: 12 },
-  { name: 'Jenseits', chance: 0.0000002, color: '#ffd700', weight: 13 }
+  { name: 'Gewöhnlich', chance: 0.42, color: '#aaaaaa', weight: 1 },
+  { name: 'Ungewöhnlich', chance: 0.26, color: '#55ff55', weight: 2 },
+  { name: 'Selten', chance: 0.16, color: '#5555ff', weight: 3 },
+  { name: 'Episch', chance: 0.08, color: '#aa55ff', weight: 4 },
+  { name: 'Legendär', chance: 0.035, color: '#ffaa00', weight: 5 },
+  { name: 'Mythisch', chance: 0.015, color: '#ff5555', weight: 6 },
+  { name: 'Göttlich', chance: 0.006, color: '#ffff55', weight: 7 },
+  { name: 'Kosmisch', chance: 0.0022, color: '#55ffff', weight: 8 },
+  { name: 'Transzendent', chance: 0.0008, color: '#ff55ff', weight: 9 },
+  { name: 'Absolut', chance: 0.00025, color: '#ffffff', weight: 10 },
+  { name: 'Primordial', chance: 0.00006, color: '#ff00ff', weight: 11 },
+  { name: 'Unendlich', chance: 0.000012, color: '#00ffff', weight: 12 },
+  { name: 'Jenseits', chance: 0.000002, color: '#ffd700', weight: 13 }
 ];
+
+const biomes = [
+  { id: 'wald', name: 'Wald', unlock: 0, rareBonus: 1.0, desc: 'Gewöhnliche Funde, guter Start.' },
+  { id: 'hoehle', name: 'Höhle', unlock: 50, rareBonus: 1.15, desc: 'Mehr Seltenheiten in der Dunkelheit.' },
+  { id: 'ruinen', name: 'Alte Ruinen', unlock: 200, rareBonus: 1.35, desc: 'Relikte und Artefakte.' },
+  { id: 'berg', name: 'Gipfel des Berges', unlock: 500, rareBonus: 1.6, desc: 'Hohe Chancen auf Epische+.' },
+  { id: 'void', name: 'Void-Riss', unlock: 1500, rareBonus: 2.0, desc: 'Extrem seltene Dinge aus dem Nichts.' },
+  { id: 'kosmos', name: 'Kosmischer Nexus', unlock: 5000, rareBonus: 2.5, desc: 'Jenseits-Wahrscheinlichkeiten steigen stark.' }
+];
+
+const categories = ['Artefakt', 'Material', 'Kreatur', 'Relikt', 'Waffe', 'Rüstung', 'Essenz', 'Fragment'];
 
 const prefixes = {
   low: ['Gewöhnlich', 'Einfach', 'Schlicht', 'Normal', 'Alltäglich', 'Stumpf', 'Matt', 'Verstaubt'],
   mid: ['Glänzend', 'Poliert', 'Alter', 'Verzaubert', 'Leuchtend', 'Selten', 'Wertvoll', 'Geheimnisvoll'],
-  high: ['Antiker', 'Mythischer', 'Göttlicher', 'Kosmisch', 'Ewiger', 'Schicksals', 'Ursprünglicher', 'Unendlicher', 'Transzendenter', 'Absoluter', 'Primordialer', 'Zeitloser', 'Dimensionen-'],
+  high: ['Antiker', 'Mythischer', 'Göttlicher', 'Kosmisch', 'Ewiger', 'Schicksals', 'Ursprünglicher', 'Unendlicher', 'Transzendenter', 'Absoluter', 'Primordialer', 'Zeitloser'],
   ultra: ['Der Letzte', 'Der Erste', 'Jenseits von', 'Aus einer anderen Realität', 'Von den Göttern verflucht', 'Aus dem Nichts geboren', 'Der Unendliche', 'Der Absolute']
 };
 
-const bases = [
-  'Quarzstein', 'Kristall', 'Blatt', 'Feder', 'Münze', 'Relikt', 'Amulett', 'Ring', 'Schwertfragment',
-  'Drachenzahn', 'Phönixfeder', 'Sternenstaub', 'Mondstein', 'Sonnenkern', 'Zeitfragment', 'Seelenstein',
-  'Runenstein', 'Portalstein', 'Weltenkern', 'Schattenessenz', 'Lichtkristall', 'Chaosfragment',
-  'Ordnungsstein', 'Lebenssamen', 'Todesblüte', 'Traumfänger', 'Erinnerungsscherbe', 'Wunschkristall',
-  'Schicksalswürfel', 'Unendlichkeitsstein', 'Voidkristall', 'Ätherfragment', 'Nexusstein',
-  'Chroniton', 'Quantenteilchen', 'Dimensionsriss', 'Realitätsbruch', 'Kosmisches Ei', 'Urstein',
-  'Götterblut', 'Dämonenherz', 'Engelsträne', 'Drachenherz', 'Phoenixasche', 'Sternenkern'
-];
+const bases = {
+  Artefakt: ['Quarzstein', 'Kristall', 'Amulett', 'Ring', 'Relikt', 'Runenstein'],
+  Material: ['Sternenstaub', 'Mondstein', 'Sonnenkern', 'Ätherfragment', 'Nexusstein', 'Voidkristall'],
+  Kreatur: ['Drachenzahn', 'Phönixfeder', 'Dämonenherz', 'Engelsträne', 'Drachenherz', 'Phoenixasche'],
+  Relikt: ['Weltenkern', 'Schattenessenz', 'Lichtkristall', 'Chaosfragment', 'Ordnungsstein', 'Lebenssamen'],
+  Waffe: ['Schwertfragment', 'Speerspitze', 'Bogenholz', 'Stabessenz', 'Klinge des Schicksals'],
+  Rüstung: ['Schildbruchstück', 'Helmfragment', 'Brustpanzer-Scherbe', 'Handschuh der Macht'],
+  Essenz: ['Seelenstein', 'Zeitfragment', 'Traumfänger', 'Erinnerungsscherbe', 'Wunschkristall'],
+  Fragment: ['Dimensionsriss', 'Realitätsbruch', 'Kosmisches Ei', 'Urstein', 'Götterblut', 'Chroniton']
+};
 
-const suffixes = [
-  '', 'des Glücks', 'der Macht', 'der Weisheit', 'des Schicksals', 'der Ewigkeit', 'des Chaos',
-  'der Ordnung', 'der Zeit', 'des Raums', 'der Seelen', 'des Lichts', 'der Dunkelheit',
-  'der Götter', 'der Sterne', 'des Universums', 'der Unendlichkeit', 'der Realität',
-  'aus der Vergangenheit', 'aus der Zukunft', 'aus einer anderen Welt', 'des Vergessenen',
-  'der Verlorenen', 'des Ursprungs', 'des Endes', 'der Schöpfung', 'der Zerstörung'
+const suffixes = ['', 'des Glücks', 'der Macht', 'der Weisheit', 'des Schicksals', 'der Ewigkeit', 'des Chaos', 'der Ordnung', 'der Zeit', 'des Raums', 'der Seelen', 'des Lichts', 'der Dunkelheit', 'der Götter', 'der Sterne', 'des Universums', 'der Unendlichkeit'];
+
+const achievements = [
+  { id: 'first', name: 'Erster Fund', desc: 'Finde dein erstes Item', check: s => s.searches >= 1 },
+  { id: 'hundred', name: 'Hundertsucher', desc: '100 Suchen', check: s => s.searches >= 100 },
+  { id: 'thousand', name: 'Tausendfacher', desc: '1000 Suchen', check: s => s.searches >= 1000 },
+  { id: 'rare', name: 'Seltener Fund', desc: 'Finde ein Seltenes Item', check: s => hasRarity(s, 3) },
+  { id: 'epic', name: 'Epischer Sammler', desc: 'Finde ein Episches Item', check: s => hasRarity(s, 4) },
+  { id: 'legend', name: 'Legendär', desc: 'Finde ein Legendäres Item', check: s => hasRarity(s, 5) },
+  { id: 'mythic', name: 'Mythisch', desc: 'Finde ein Mythisches Item', check: s => hasRarity(s, 6) },
+  { id: 'unique50', name: 'Vielfalt', desc: '50 einzigartige Items', check: s => s.uniqueMap.size >= 50 },
+  { id: 'level5', name: 'Aufstieg', desc: 'Erreiche Level 5', check: s => s.level >= 5 },
+  { id: 'void', name: 'Void-Entdecker', desc: 'Schalte das Void-Biome frei', check: s => s.unlockedBiomes.includes('void') }
 ];
 
 let state = {
@@ -318,103 +188,161 @@ let state = {
   items: [],
   uniqueMap: new Map(),
   autoInterval: null,
-  autoOn: false
+  autoOn: false,
+  level: 1,
+  xp: 0,
+  searchPower: 1,
+  currentBiome: 'wald',
+  unlockedBiomes: ['wald'],
+  unlockedAchievements: [],
+  lastOnline: Date.now(),
+  dailyClaimed: null,
+  upgrades: { power: 0 }
 };
+
+function hasRarity(s, weight) {
+  for (const d of s.uniqueMap.values()) if (d.weight >= weight) return true;
+  return false;
+}
 
 function loadState() {
   const saved = localStorage.getItem('infiniteCollection');
   if (saved) {
     const data = JSON.parse(saved);
-    state.searches = data.searches || 0;
-    state.items = data.items || [];
+    Object.assign(state, data);
     state.uniqueMap = new Map(data.unique || []);
+    state.unlockedBiomes = data.unlockedBiomes || ['wald'];
+    state.unlockedAchievements = data.unlockedAchievements || [];
   }
+  processOffline();
+  checkDaily();
   updateUI();
+  checkAchievements();
 }
 
 function saveState() {
   const data = {
-    searches: state.searches,
-    items: state.items.slice(-200),
-    unique: Array.from(state.uniqueMap.entries())
+    ...state,
+    items: state.items.slice(-300),
+    unique: Array.from(state.uniqueMap.entries()),
+    lastOnline: Date.now()
   };
+  delete data.autoInterval;
   localStorage.setItem('infiniteCollection', JSON.stringify(data));
 }
 
+function processOffline() {
+  const now = Date.now();
+  const elapsed = Math.min(now - (state.lastOnline || now), 12 * 3600 * 1000);
+  if (elapsed > 60000 && state.searches > 10) {
+    const offlineSearches = Math.floor(elapsed / 2000) * state.searchPower;
+    if (offlineSearches > 0) {
+      showNotification(`Offline: +${offlineSearches} Suchen simuliert`);
+      for (let i = 0; i < Math.min(offlineSearches, 500); i++) doSearch(false);
+    }
+  }
+  state.lastOnline = now;
+}
+
+function checkDaily() {
+  const today = new Date().toDateString();
+  if (state.dailyClaimed !== today) {
+    state.xp += 50 * state.level;
+    showNotification('Tägliche Belohnung: +XP!');
+    state.dailyClaimed = today;
+  }
+}
+
+function getLuck() {
+  const biome = biomes.find(b => b.id === state.currentBiome) || biomes[0];
+  return (1 + (state.level - 1) * 0.03) * biome.rareBonus;
+}
+
 function rollRarity() {
+  const luck = getLuck();
   const roll = Math.random();
   let cumulative = 0;
   for (const r of rarities) {
-    cumulative += r.chance;
+    let chance = r.chance;
+    if (r.weight >= 4) chance *= luck;
+    cumulative += chance;
     if (roll < cumulative) return r;
   }
   return rarities[0];
 }
 
 function generateName(rarity) {
-  let prefixList, suffixList = suffixes;
-  const weight = rarity.weight;
-  
-  if (weight <= 3) prefixList = prefixes.low;
-  else if (weight <= 6) prefixList = [...prefixes.low, ...prefixes.mid];
-  else if (weight <= 9) prefixList = [...prefixes.mid, ...prefixes.high];
-  else prefixList = [...prefixes.high, ...prefixes.ultra];
-
+  const cat = categories[Math.floor(Math.random() * categories.length)];
+  let prefixList = rarity.weight <= 3 ? prefixes.low : rarity.weight <= 6 ? [...prefixes.low, ...prefixes.mid] : rarity.weight <= 9 ? [...prefixes.mid, ...prefixes.high] : [...prefixes.high, ...prefixes.ultra];
   const prefix = prefixList[Math.floor(Math.random() * prefixList.length)];
-  const base = bases[Math.floor(Math.random() * bases.length)];
-  let suffix = '';
-  
-  if (Math.random() > 0.4 || weight > 7) {
-    suffix = ' ' + suffixList[Math.floor(Math.random() * suffixList.length)];
+  const baseList = bases[cat] || bases.Artefakt;
+  const base = baseList[Math.floor(Math.random() * baseList.length)];
+  let suffix = Math.random() > 0.5 || rarity.weight > 7 ? ' ' + suffixes[Math.floor(Math.random() * suffixes.length)] : '';
+  if (rarity.weight >= 10 && Math.random() > 0.65) {
+    const mods = ['#', 'α', 'Ω', '∞', '★', '✧'];
+    suffix += ' ' + mods[Math.floor(Math.random() * mods.length)] + Math.floor(Math.random() * 9999);
   }
-  
-  if (weight >= 10 && Math.random() > 0.7) {
-    const uniqueMods = ['#', 'α', 'Ω', '∞', '★', '✧'];
-    suffix += ' ' + uniqueMods[Math.floor(Math.random() * uniqueMods.length)] + Math.floor(Math.random() * 9999);
-  }
-
-  return `${prefix} ${base}${suffix}`.trim();
+  return { name: `${prefix} ${base}${suffix}`.trim(), category: cat };
 }
 
-function search() {
-  state.searches++;
-  const rarity = rollRarity();
-  const name = generateName(rarity);
-  
-  const item = {
-    name,
-    rarity: rarity.name,
-    color: rarity.color,
-    weight: rarity.weight,
-    timestamp: Date.now(),
-    id: Date.now() + Math.random()
-  };
-
-  state.items.unshift(item);
-  if (state.items.length > 100) state.items.pop();
-
-  const key = name.toLowerCase();
-  if (state.uniqueMap.has(key)) {
-    const existing = state.uniqueMap.get(key);
-    existing.count++;
-    state.uniqueMap.set(key, existing);
-  } else {
-    state.uniqueMap.set(key, {
-      count: 1,
+function doSearch(notify = true) {
+  const times = state.searchPower;
+  for (let t = 0; t < times; t++) {
+    state.searches++;
+    state.xp += 1 + Math.floor(state.level / 2);
+    const rarity = rollRarity();
+    const gen = generateName(rarity);
+    const item = {
+      name: gen.name,
+      category: gen.category,
       rarity: rarity.name,
       color: rarity.color,
       weight: rarity.weight,
-      name: name
-    });
-  }
+      timestamp: Date.now(),
+      id: Date.now() + Math.random()
+    };
+    state.items.unshift(item);
+    if (state.items.length > 150) state.items.pop();
 
-  addRecentFind(item);
+    const key = item.name.toLowerCase();
+    if (state.uniqueMap.has(key)) {
+      state.uniqueMap.get(key).count++;
+    } else {
+      state.uniqueMap.set(key, { count: 1, rarity: rarity.name, color: rarity.color, weight: rarity.weight, name: item.name, category: gen.category });
+    }
+
+    if (notify && t === 0) addRecentFind(item);
+    if (rarity.weight >= 6 && notify) showNotification(`🌟 ${rarity.name}: ${item.name}`);
+  }
+  levelUpCheck();
+  checkAchievements();
   updateUI();
   saveState();
+  playSound(notify && Math.random() > 0.7);
+}
 
-  if (rarity.weight >= 6) {
-    showNotification(`🌟 ${rarity.name} gefunden: ${name}`);
+function levelUpCheck() {
+  const needed = state.level * 100 + Math.pow(state.level, 1.5) * 20;
+  if (state.xp >= needed) {
+    state.level++;
+    state.xp = 0;
+    showNotification(`Level Up! Jetzt Level ${state.level}`);
+    biomes.forEach(b => {
+      if (state.searches >= b.unlock && !state.unlockedBiomes.includes(b.id)) {
+        state.unlockedBiomes.push(b.id);
+        showNotification(`Neues Biome freigeschaltet: ${b.name}`);
+      }
+    });
   }
+}
+
+function checkAchievements() {
+  achievements.forEach(a => {
+    if (!state.unlockedAchievements.includes(a.id) && a.check(state)) {
+      state.unlockedAchievements.push(a.id);
+      showNotification(`🏆 Achievement: ${a.name}`);
+    }
+  });
 }
 
 function addRecentFind(item) {
@@ -422,50 +350,49 @@ function addRecentFind(item) {
   const card = document.createElement('div');
   card.className = 'find-card' + (item.weight >= 8 ? ' glow' : '');
   card.style.borderLeftColor = item.color;
-  card.innerHTML = `
-    <div>
-      <div style="font-weight:600; color:${item.color}">${item.name}</div>
-      <div style="font-size:0.85rem; color:#aaa">vor einem Moment</div>
-    </div>
-    <span class="rarity-badge" style="background:${item.color}22; color:${item.color}; border:1px solid ${item.color}">
-      ${item.rarity}
-    </span>
-  `;
+  card.innerHTML = `<div><div style="font-weight:600; color:${item.color}">${item.name}</div><div style="font-size:0.8rem; color:#aaa">${item.category} • gerade eben</div></div><span class="rarity-badge" style="background:${item.color}22; color:${item.color}; border:1px solid ${item.color}">${item.rarity}</span>`;
   list.prepend(card);
-  
-  while (list.children.length > 8) {
-    list.removeChild(list.lastChild);
-  }
+  while (list.children.length > 6) list.removeChild(list.lastChild);
 }
 
 function updateUI() {
   document.getElementById('total-searches').textContent = state.searches.toLocaleString('de-DE');
-  
-  let totalFinds = 0;
-  let rarestWeight = 0;
-  let rarestName = '-';
-  let rarestColor = '#fff';
-  
-  for (const [key, data] of state.uniqueMap) {
-    totalFinds += data.count;
-    if (data.weight > rarestWeight) {
-      rarestWeight = data.weight;
-      rarestName = data.rarity;
-      rarestColor = data.color;
-    }
+  let totalFinds = 0, rarestW = 0, rarestN = '-', rarestC = '#fff';
+  for (const d of state.uniqueMap.values()) {
+    totalFinds += d.count;
+    if (d.weight > rarestW) { rarestW = d.weight; rarestN = d.rarity; rarestC = d.color; }
   }
-  
   document.getElementById('total-items').textContent = totalFinds.toLocaleString('de-DE');
   document.getElementById('unique-items').textContent = state.uniqueMap.size.toLocaleString('de-DE');
-  document.getElementById('rarest-item').textContent = rarestName;
-  document.getElementById('rarest-item').style.color = rarestColor;
+  document.getElementById('rarest-item').textContent = rarestN;
+  document.getElementById('rarest-item').style.color = rarestC;
+  document.getElementById('player-level').textContent = state.level;
+  document.getElementById('luck-mult').textContent = getLuck().toFixed(2);
+  document.getElementById('current-biome').textContent = biomes.find(b => b.id === state.currentBiome)?.name || 'Wald';
+  document.getElementById('search-power').textContent = state.searchPower;
+  const needed = state.level * 100 + Math.pow(state.level, 1.5) * 20;
+  document.getElementById('xp-display').textContent = Math.floor(state.xp);
+  document.getElementById('xp-bar').style.width = Math.min(100, (state.xp / needed) * 100) + '%';
 }
 
 function showNotification(text) {
   const n = document.getElementById('notification');
   n.textContent = text;
   n.classList.add('show');
-  setTimeout(() => n.classList.remove('show'), 4000);
+  setTimeout(() => n.classList.remove('show'), 3500);
+}
+
+function playSound(rare) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = rare ? 880 : 440;
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    osc.start(); osc.stop(ctx.currentTime + 0.3);
+  } catch(e) {}
 }
 
 function toggleAuto() {
@@ -474,7 +401,7 @@ function toggleAuto() {
   if (state.autoOn) {
     btn.textContent = 'Auto-Suche: AN';
     btn.classList.add('active');
-    state.autoInterval = setInterval(search, 350);
+    state.autoInterval = setInterval(() => doSearch(true), 400);
   } else {
     btn.textContent = 'Auto-Suche: AUS';
     btn.classList.remove('active');
@@ -482,95 +409,109 @@ function toggleAuto() {
   }
 }
 
-function openInventory() {
-  document.getElementById('inventory-modal').classList.add('active');
-  renderInventory('all');
-  renderFilters();
-}
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); }
 
-function closeInventory() {
-  document.getElementById('inventory-modal').classList.remove('active');
-}
-
-function renderFilters() {
-  const bar = document.getElementById('filter-bar');
-  bar.innerHTML = '<button class="filter-btn active" data-filter="all">Alle</button>';
-  
-  rarities.forEach(r => {
-    if (r.weight >= 1) {
-      const btn = document.createElement('button');
-      btn.className = 'filter-btn';
-      btn.dataset.filter = r.name;
-      btn.textContent = r.name;
-      btn.style.borderColor = r.color;
-      btn.onclick = () => renderInventory(r.name);
-      bar.appendChild(btn);
-    }
-  });
-  
-  bar.querySelector('[data-filter="all"]').onclick = () => renderInventory('all');
-}
-
-function renderInventory(filter) {
+function renderInventory(filter = 'all', search = '') {
   const grid = document.getElementById('inventory-grid');
   grid.innerHTML = '';
-  
-  document.querySelectorAll('.filter-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.filter === filter);
-  });
-
-  const uniqueItems = Array.from(state.uniqueMap.entries())
-    .map(([key, data]) => data)
-    .filter(i => filter === 'all' || i.rarity === filter)
+  const uniqueItems = Array.from(state.uniqueMap.values())
+    .filter(i => (filter === 'all' || i.rarity === filter) && (i.name.toLowerCase().includes(search.toLowerCase()) || (i.category || '').toLowerCase().includes(search.toLowerCase())))
     .sort((a, b) => b.weight - a.weight || b.count - a.count);
-
-  if (uniqueItems.length === 0) {
-    grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#aaa; padding:40px;">Noch keine Items dieser Seltenheit gefunden.</p>';
-    return;
-  }
-
+  if (!uniqueItems.length) { grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#aaa;padding:30px;">Keine Items gefunden.</p>'; return; }
   uniqueItems.forEach(item => {
     const el = document.createElement('div');
     el.className = 'inv-item';
     el.style.borderLeftColor = item.color;
-    el.innerHTML = `
-      <div class="name" style="color:${item.color}">${item.name}</div>
-      <div class="meta">${item.rarity} • ${item.count}x gefunden</div>
-    `;
+    el.innerHTML = `<div class="name" style="color:${item.color}">${item.name}</div><div class="meta">${item.category || 'Item'} • ${item.rarity} • ${item.count}x</div>`;
     grid.appendChild(el);
   });
 }
 
-function resetProgress() {
-  if (confirm('Wirklich den gesamten Fortschritt löschen? Das kann nicht rückgängig gemacht werden.')) {
-    localStorage.removeItem('infiniteCollection');
-    state = { searches: 0, items: [], uniqueMap: new Map(), autoInterval: null, autoOn: false };
-    document.getElementById('recent-list').innerHTML = '';
-    updateUI();
-    if (state.autoOn) toggleAuto();
-    showNotification('Fortschritt zurückgesetzt');
-  }
+function renderFilters() {
+  const bar = document.getElementById('filter-bar');
+  bar.innerHTML = '<button class="filter-btn active" data-f="all">Alle</button>';
+  rarities.forEach(r => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.dataset.f = r.name;
+    btn.textContent = r.name;
+    btn.style.borderColor = r.color;
+    btn.onclick = () => { renderInventory(r.name, document.getElementById('inv-search').value); document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.f === r.name)); };
+    bar.appendChild(btn);
+  });
+  bar.querySelector('[data-f="all"]').onclick = () => { renderInventory('all', document.getElementById('inv-search').value); document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.f === 'all')); };
 }
 
-document.getElementById('search-btn').addEventListener('click', search);
-document.getElementById('auto-btn').addEventListener('click', toggleAuto);
-document.getElementById('inv-btn').addEventListener('click', openInventory);
-document.getElementById('close-modal').addEventListener('click', closeInventory);
-document.getElementById('reset-btn').addEventListener('click', resetProgress);
+function renderAchievements() {
+  const list = document.getElementById('ach-list');
+  list.innerHTML = '';
+  achievements.forEach(a => {
+    const unlocked = state.unlockedAchievements.includes(a.id);
+    const el = document.createElement('div');
+    el.className = 'upgrade-item';
+    el.style.opacity = unlocked ? 1 : 0.5;
+    el.innerHTML = `<strong>${unlocked ? '✅' : '🔒'} ${a.name}</strong><div style="font-size:0.85rem;color:#aaa;margin-top:4px;">${a.desc}</div>`;
+    list.appendChild(el);
+  });
+}
 
-document.getElementById('inventory-modal').addEventListener('click', (e) => {
-  if (e.target.id === 'inventory-modal') closeInventory();
-});
+function renderUpgrades() {
+  const list = document.getElementById('upg-list');
+  list.innerHTML = '';
+  const cost = 50 * Math.pow(2, state.upgrades.power);
+  const el = document.createElement('div');
+  el.className = 'upgrade-item';
+  el.innerHTML = `<strong>Suchkraft +1</strong><div style="font-size:0.85rem;color:#aaa;margin:6px 0;">Aktuell: x${state.searchPower} | Kosten: ${cost} XP</div><button class="search-btn" style="padding:8px 16px;font-size:0.9rem;" ${state.xp < cost ? 'disabled' : ''}>Kaufen</button>`;
+  el.querySelector('button').onclick = () => {
+    if (state.xp >= cost) {
+      state.xp -= cost;
+      state.upgrades.power++;
+      state.searchPower++;
+      showNotification('Suchkraft verbessert!');
+      updateUI();
+      saveState();
+      renderUpgrades();
+    }
+  };
+  list.appendChild(el);
+  list.innerHTML += `<div style="margin-top:20px;font-size:0.85rem;color:#aaa;">Exportiere deinen Fortschritt als Text (für späteres Import oder Sharing):<br><textarea readonly style="width:100%;height:80px;margin-top:8px;background:#1a1a2e;color:#ccc;border:1px solid #444;border-radius:8px;padding:8px;" id="export-box"></textarea><button class="inv-btn" style="margin-top:8px;" onclick="document.getElementById('export-box').value=btoa(JSON.stringify(localStorage.getItem('infiniteCollection')));">Export generieren</button></div>`;
+}
 
-document.addEventListener('keydown', (e) => {
-  if (e.code === 'Space' && !e.repeat) {
-    e.preventDefault();
-    search();
+function renderBiomes() {
+  const list = document.getElementById('bio-list');
+  list.innerHTML = '';
+  biomes.forEach(b => {
+    const unlocked = state.unlockedBiomes.includes(b.id);
+    const active = state.currentBiome === b.id;
+    const el = document.createElement('div');
+    el.className = 'biome-select' + (active ? ' active' : '');
+    el.style.opacity = unlocked ? 1 : 0.45;
+    el.innerHTML = `<strong>${b.name}</strong> ${unlocked ? '' : '(gesperrt)'}<div style="font-size:0.85rem;color:#aaa;margin-top:4px;">${b.desc}<br>Seltenheits-Bonus: x${b.rareBonus} | Freischaltung bei ${b.unlock} Suchen</div>`;
+    if (unlocked) el.onclick = () => { state.currentBiome = b.id; updateUI(); saveState(); renderBiomes(); showNotification(`Biome gewechselt: ${b.name}`); };
+    list.appendChild(el);
+  });
+}
+
+document.getElementById('search-btn').onclick = () => doSearch(true);
+document.getElementById('auto-btn').onclick = toggleAuto;
+document.getElementById('inv-btn').onclick = () => { openModal('inventory-modal'); renderFilters(); renderInventory(); };
+document.getElementById('ach-btn').onclick = () => { openModal('ach-modal'); renderAchievements(); };
+document.getElementById('upg-btn').onclick = () => { openModal('upg-modal'); renderUpgrades(); };
+document.getElementById('bio-btn').onclick = () => { openModal('bio-modal'); renderBiomes(); };
+document.querySelectorAll('[data-close]').forEach(b => b.onclick = closeModals);
+document.querySelectorAll('.modal').forEach(m => m.onclick = e => { if (e.target === m) closeModals(); });
+document.getElementById('inv-search').oninput = e => renderInventory(document.querySelector('.filter-btn.active')?.dataset.f || 'all', e.target.value);
+document.getElementById('reset-btn').onclick = () => {
+  if (confirm('Wirklich alles zurücksetzen?')) {
+    localStorage.removeItem('infiniteCollection');
+    location.reload();
   }
-});
+};
+document.addEventListener('keydown', e => { if (e.code === 'Space' && !e.repeat && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') { e.preventDefault(); doSearch(true); } });
 
 loadState();
-console.log('Seltenste Items brauchen Wochen an Grinden. Viel Erfolg!');
+console.log('Erweiterte Version geladen. Viel Spaß beim Grinden!');
 </script>
 </body>
 </html>
