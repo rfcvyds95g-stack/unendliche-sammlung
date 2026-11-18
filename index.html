@@ -7,7 +7,7 @@
 <style>
 :root { --bg:#0d0d1a; --card:#16162a; --accent:#7c5cff; --text:#e8e8ff; --muted:#8888aa; }
 * { box-sizing:border-box; margin:0; padding:0; }
-body { font-family:system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+body { font-family:system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background .6s; }
 .nav { background:#12122a; border-bottom:1px solid #2a2a44; padding:12px 20px; display:flex; gap:8px; overflow-x:auto; position:sticky; top:0; z-index:100; }
 .nav button { background:transparent; border:none; color:var(--muted); padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:600; white-space:nowrap; transition:.2s; }
 .nav button.active { background:var(--accent); color:#fff; }
@@ -45,9 +45,8 @@ button.action { padding:14px 28px; font-size:1.1rem; border:none; border-radius:
 .filter-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
 .filter-btn { padding:6px 14px; border-radius:20px; background:#2a2a44; border:1px solid #444; color:var(--text); cursor:pointer; font-size:.85rem; }
 .filter-btn.active { background:var(--accent); }
-.biome-card { cursor:pointer; transition:.2s; }
-.biome-card:hover { border-color:var(--accent); }
-.biome-card.active { border-color:#10b981; }
+.event-banner { background:linear-gradient(90deg,#7c5cff,#a78bfa); color:#fff; padding:10px 16px; border-radius:10px; margin:12px 0; text-align:center; font-weight:600; display:none; }
+.event-banner.active { display:block; }
 </style>
 </head>
 <body>
@@ -56,7 +55,7 @@ button.action { padding:14px 28px; font-size:1.1rem; border:none; border-radius:
   <button class="nav-btn" data-page="inventory">📦 Inventar</button>
   <button class="nav-btn" data-page="skills">🌳 Skilltree</button>
   <button class="nav-btn" data-page="achievements">🏆 Achievements</button>
-  <button class="nav-btn" data-page="biomes">🌍 Biome</button>
+  <button class="nav-btn" data-page="events">🌍 Events</button>
   <button class="nav-btn" data-page="stats">📊 Stats</button>
 </nav>
 
@@ -64,8 +63,9 @@ button.action { padding:14px 28px; font-size:1.1rem; border:none; border-radius:
   <header>
     <h1>Die Unendliche Sammlung</h1>
     <p class="subtitle">Sammle gewöhnliche bis jenseits-seltene Artefakte</p>
-    <div style="margin-top:10px;color:var(--muted);font-size:.9rem;">Level <span id="player-level">1</span> • Glück: <span id="luck-mult">1.00</span>x • Biome: <span id="current-biome">Wald</span> • SP: <span id="skill-points">0</span></div>
+    <div style="margin-top:10px;color:var(--muted);font-size:.9rem;">Level <span id="player-level">1</span> • Glück: <span id="luck-mult">1.00</span>x • Event: <span id="current-event">Keins</span> • SP: <span id="skill-points">0</span></div>
   </header>
+  <div id="event-banner" class="event-banner"></div>
   <div class="stats">
     <div class="stat-card"><h3>Suchen</h3><div class="value" id="total-searches">0</div></div>
     <div class="stat-card"><h3>Items</h3><div class="value" id="total-items">0</div></div>
@@ -101,14 +101,14 @@ button.action { padding:14px 28px; font-size:1.1rem; border:none; border-radius:
   <div id="ach-list" class="grid"></div>
 </div>
 
-<div class="page" id="page-biomes">
-  <h2 style="margin-bottom:16px;">🌍 Biome</h2>
+<div class="page" id="page-events">
+  <h2 style="margin-bottom:16px;">🌍 Events</h2>
+  <div id="event-status" class="card" style="margin-bottom:16px;text-align:center;"></div>
   <div id="bio-list" class="grid"></div>
 </div>
 
 <div class="page" id="page-stats">
   <h2 style="margin-bottom:16px;">📊 Statistiken</h2>
-  <div class="stats" id="extra-stats"></div>
   <div style="margin-top:20px;">
     <button class="action" style="background:#2a2a44;" onclick="exportSave()">Export Speichern</button>
     <textarea id="export-box" readonly style="width:100%;height:100px;margin-top:10px;background:#1a1a2e;color:#ccc;border:1px solid #333;border-radius:8px;padding:10px;"></textarea>
@@ -135,12 +135,12 @@ const rarities = [
 ];
 
 const biomes = [
-  {id:'wald',name:'🌲 Wald',unlock:0,rareBonus:1.0,desc:'Startbiome – gewöhnliche Funde'},
-  {id:'hoehle',name:'🕳️ Höhle',unlock:40,rareBonus:1.2,desc:'Mehr Seltenheiten in der Dunkelheit'},
-  {id:'ruinen',name:'🏛️ Ruinen',unlock:150,rareBonus:1.4,desc:'Relikte und Artefakte'},
-  {id:'berg',name:'⛰️ Berggipfel',unlock:400,rareBonus:1.7,desc:'Hohe Chancen auf Epische+'},
-  {id:'void',name:'🌀 Void',unlock:1200,rareBonus:2.1,desc:'Extrem seltene Dinge'},
-  {id:'kosmos',name:'🌌 Kosmos',unlock:4000,rareBonus:2.6,desc:'Endgame-Biome'}
+  {id:'wald',name:'🌲 Wald',rareBonus:1.0,desc:'Ruhiger Wald – Standard-Chancen', theme:'#0d1a0d'},
+  {id:'hoehle',name:'🕳️ Höhle',rareBonus:1.25,desc:'Dunkle Höhle – mehr Seltenheiten', theme:'#1a1a0d'},
+  {id:'ruinen',name:'🏛️ Ruinen',rareBonus:1.45,desc:'Alte Ruinen – Relikte häufiger', theme:'#1a1210'},
+  {id:'berg',name:'⛰️ Berggipfel',rareBonus:1.7,desc:'Hohe Gipfel – starke Rare-Boni', theme:'#0d121a'},
+  {id:'void',name:'🌀 Void',rareBonus:2.1,desc:'Void-Riss – extrem seltene Funde', theme:'#120d1a'},
+  {id:'kosmos',name:'🌌 Kosmos',rareBonus:2.5,desc:'Kosmischer Nexus – maximale Chancen', theme:'#0a0a1a'}
 ];
 
 const categories = ['Artefakt','Material','Kreatur','Relikt','Waffe','Rüstung','Essenz','Fragment'];
@@ -198,9 +198,10 @@ const achievements = [
 
 let state = {
   searches:0, items:[], uniqueMap:new Map(), autoInterval:null, autoOn:false,
-  level:1, xp:0, searchPower:1, currentBiome:'wald', unlockedBiomes:['wald'],
+  level:1, xp:0, searchPower:1, currentBiome:'wald',
   unlockedAchievements:[], lastOnline:Date.now(), dailyClaimed:null,
-  skillPoints:0, unlockedSkills:[]
+  skillPoints:0, unlockedSkills:[],
+  activeEvent: null
 };
 
 function hasRarity(s,w){ for(const d of s.uniqueMap.values()) if(d.weight>=w) return true; return false; }
@@ -219,14 +220,16 @@ function loadState(){
     const d = JSON.parse(saved);
     Object.assign(state,d);
     state.uniqueMap = new Map(d.unique||[]);
-    state.unlockedBiomes = d.unlockedBiomes||['wald'];
     state.unlockedAchievements = d.unlockedAchievements||[];
     state.unlockedSkills = d.unlockedSkills||[];
+    if(d.activeEvent && d.activeEvent.endsAt > Date.now()) state.activeEvent = d.activeEvent;
+    else state.activeEvent = null;
   }
   processOffline();
   checkDaily();
   updateUI();
   checkAchievements();
+  applyEventTheme();
 }
 
 function saveState(){
@@ -260,8 +263,15 @@ function checkDaily(){
   }
 }
 
+function getActiveBiome(){
+  if(state.activeEvent && state.activeEvent.endsAt > Date.now()){
+    return biomes.find(b=>b.id===state.activeEvent.biomeId) || biomes[0];
+  }
+  return biomes[0];
+}
+
 function getLuck(){
-  const biome = biomes.find(b=>b.id===state.currentBiome)||biomes[0];
+  const biome = getActiveBiome();
   const eff = getSkillEffects();
   return (1+(state.level-1)*0.025) * biome.rareBonus * (1+(eff.luck||0)) * (1+(eff.biome||0));
 }
@@ -287,7 +297,39 @@ function generateName(r){
   return {name, category:cat};
 }
 
+function tryTriggerEvent(){
+  if(state.activeEvent && state.activeEvent.endsAt > Date.now()) return;
+  if(Math.random() < 0.008){
+    const possible = biomes.filter(b=>b.id!=='wald');
+    const chosen = possible[Math.floor(Math.random()*possible.length)];
+    const duration = (5 + Math.random()*10) * 60 * 1000;
+    state.activeEvent = {biomeId: chosen.id, endsAt: Date.now() + duration};
+    showNotification(`🌟 Event gestartet: ${chosen.name}!`);
+    applyEventTheme();
+  }
+}
+
+function applyEventTheme(){
+  const biome = getActiveBiome();
+  document.body.style.background = biome.theme || '#0d0d1a';
+  const banner = document.getElementById('event-banner');
+  if(state.activeEvent && state.activeEvent.endsAt > Date.now()){
+    const remaining = Math.max(0, Math.floor((state.activeEvent.endsAt - Date.now())/1000));
+    const min = Math.floor(remaining/60);
+    const sec = remaining%60;
+    banner.textContent = `${biome.name} aktiv! Noch ${min}:${sec.toString().padStart(2,'0')} min`;
+    banner.classList.add('active');
+    document.getElementById('current-event').textContent = biome.name;
+  } else {
+    banner.classList.remove('active');
+    document.getElementById('current-event').textContent = 'Keins';
+    document.body.style.background = '#0d0d1a';
+    state.activeEvent = null;
+  }
+}
+
 function doSearch(notify=true){
+  tryTriggerEvent();
   const times = state.searchPower + (getSkillEffects().power||0);
   const xpMult = 1 + (getSkillEffects().xp||0);
   for(let t=0;t<times;t++){
@@ -308,6 +350,7 @@ function doSearch(notify=true){
   checkAchievements();
   updateUI();
   saveState();
+  applyEventTheme();
 }
 
 function levelUpCheck(){
@@ -349,7 +392,6 @@ function updateUI(){
   document.getElementById('rarest-item').style.color=rc;
   document.getElementById('player-level').textContent=state.level;
   document.getElementById('luck-mult').textContent=getLuck().toFixed(2);
-  document.getElementById('current-biome').textContent=biomes.find(b=>b.id===state.currentBiome)?.name||'Wald';
   document.getElementById('search-power').textContent=state.searchPower + (getSkillEffects().power||0);
   document.getElementById('skill-points').textContent=state.skillPoints;
   const needed=state.level*80 + Math.pow(state.level,1.4)*15;
@@ -439,17 +481,21 @@ function renderAchievements(){
   });
 }
 
-function renderBiomes(){
+function renderEvents(){
+  const status=document.getElementById('event-status');
   const list=document.getElementById('bio-list');
   list.innerHTML='';
+  if(state.activeEvent && state.activeEvent.endsAt > Date.now()){
+    const b = biomes.find(x=>x.id===state.activeEvent.biomeId);
+    const rem = Math.max(0, Math.floor((state.activeEvent.endsAt - Date.now())/1000));
+    status.innerHTML = `<strong>Aktives Event: ${b.name}</strong><div style="margin-top:6px;">Noch ${Math.floor(rem/60)}:${(rem%60).toString().padStart(2,'0')} min • Bonus x${b.rareBonus}</div>`;
+  } else {
+    status.innerHTML = '<strong>Kein Event aktiv</strong><div style="margin-top:6px;color:var(--muted);">Events starten zufällig beim Suchen (ca. 0,8% Chance)</div>';
+  }
   biomes.forEach(b=>{
-    const un=state.unlockedBiomes.includes(b.id);
-    const act=state.currentBiome===b.id;
     const el=document.createElement('div');
-    el.className='card biome-card'+(act?' active':'');
-    el.style.opacity=un?1:0.5;
-    el.innerHTML=`<strong>${b.name}</strong><div style="font-size:.85rem;color:var(--muted);margin-top:6px;">${b.desc}<br>Bonus: x${b.rareBonus} • Unlock: ${b.unlock} Suchen</div>`;
-    if(un) el.onclick=()=>{state.currentBiome=b.id; updateUI(); saveState(); renderBiomes(); showNotification('Biome gewechselt: '+b.name);};
+    el.className='card';
+    el.innerHTML=`<strong>${b.name}</strong><div style="font-size:.85rem;color:var(--muted);margin-top:6px;">${b.desc}<br>Bonus: x${b.rareBonus}</div>`;
     list.appendChild(el);
   });
 }
@@ -467,7 +513,7 @@ document.querySelectorAll('.nav-btn').forEach(btn=>{
     if(btn.dataset.page==='inventory'){ renderFilters(); renderInventory(); }
     if(btn.dataset.page==='skills') renderSkills();
     if(btn.dataset.page==='achievements') renderAchievements();
-    if(btn.dataset.page==='biomes') renderBiomes();
+    if(btn.dataset.page==='events') renderEvents();
   };
 });
 
@@ -477,8 +523,10 @@ document.getElementById('inv-search').oninput=e=>renderInventory(document.queryS
 document.getElementById('reset-btn').onclick=()=>{if(confirm('Alles zurücksetzen?')){localStorage.removeItem('infiniteCollection');location.reload();}};
 document.addEventListener('keydown',e=>{if(e.code==='Space' && !e.repeat && document.activeElement.tagName!=='INPUT' && document.activeElement.tagName!=='TEXTAREA'){e.preventDefault();doSearch(true);}});
 
+setInterval(applyEventTheme, 1000);
+
 loadState();
-console.log('Moderne UI geladen!');
+console.log('Event-basierte Biome geladen!');
 </script>
 </body>
 </html>
