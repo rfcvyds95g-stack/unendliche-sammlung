@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Die Unendliche Sammlung</title>
+<style>
+:root {
+  --bg: #0f0f1a;
+  --card: #1a1a2e;
+  --accent: #6c5ce7;
+  --text: #e0e0ff;
+  --common: #aaaaaa;
+  --uncommon: #55ff55;
+  --rare: #5555ff;
+  --epic: #aa55ff;
+  --legendary: #ffaa00;
+  --mythic: #ff5555;
+  --divine: #ffff55;
+  --cosmic: #55ffff;
+  --transcendent: #ff55ff;
+  --absolute: #ffffff;
+  --primordial: #ff00ff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(135deg, #0f0f1a 0%, #1a0a2e 100%);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 20px;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: rgba(26,26,46,0.8);
+  border-radius: 16px;
+  border: 1px solid #333;
+}
+h1 {
+  font-size: 2.5rem;
+  background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+.subtitle { color: #aaa; font-size: 1.1rem; }
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin: 25px 0;
+}
+.stat-card {
+  background: var(--card);
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid #333;
+}
+.stat-card h3 { font-size: 0.9rem; color: #aaa; margin-bottom: 5px; }
+.stat-card .value { font-size: 1.6rem; font-weight: bold; color: var(--accent); }
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  margin: 30px 0;
+}
+button {
+  padding: 16px 32px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 600;
+}
+.search-btn {
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  color: white;
+  min-width: 200px;
+  box-shadow: 0 4px 15px rgba(108,92,231,0.4);
+}
+.search-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(108,92,231,0.6); }
+.search-btn:active { transform: translateY(0); }
+.auto-btn {
+  background: #2d2d4a;
+  color: var(--text);
+  border: 1px solid #444;
+}
+.auto-btn.active { background: #00b894; color: white; }
+.inv-btn { background: #2d2d4a; color: var(--text); border: 1px solid #444; }
+.recent-finds {
+  margin: 30px 0;
+  min-height: 100px;
+}
+.find-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 15px 20px;
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 5px solid;
+  animation: slideIn 0.4s ease-out;
+  transition: transform 0.2s;
+}
+.find-card:hover { transform: translateX(5px); }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rarity-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+.modal.active { display: flex; }
+.modal-content {
+  background: var(--card);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #444;
+}
+.modal-header {
+  padding: 20px;
+  border-bottom: 1px solid #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.inv-item {
+  background: #252540;
+  border-radius: 10px;
+  padding: 12px;
+  border-left: 4px solid;
+  font-size: 0.95rem;
+}
+.inv-item .name { font-weight: 600; margin-bottom: 4px; }
+.inv-item .meta { font-size: 0.8rem; color: #aaa; }
+.close-btn {
+  background: #e74c3c;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+.filter-btn {
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  border-radius: 20px;
+  background: #2d2d4a;
+  color: var(--text);
+  border: 1px solid #444;
+}
+.filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+.glow { animation: glow 1.5s ease-in-out infinite alternate; }
+@keyframes glow {
+  from { box-shadow: 0 0 5px currentColor; }
+  to { box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+}
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #00b894;
+  color: white;
+  padding: 15px 25px;
+  border-radius: 10px;
+  transform: translateX(400px);
+  transition: transform 0.4s;
+  z-index: 2000;
+  font-weight: 600;
+}
+.notification.show { transform: translateX(0); }
+.reset-btn {
+  background: transparent;
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Die Unendliche Sammlung</h1>
+    <p class="subtitle">Sammle gewöhnliche bis absolut seltene Artefakte. Einige erfordern Wochen des Grindens!</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat-card">
+      <h3>Suchen</h3>
+      <div class="value" id="total-searches">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Gefundene Items</h3>
+      <div class="value" id="total-items">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Einzigartige</h3>
+      <div class="value" id="unique-items">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Seltenstes</h3>
+      <div class="value" id="rarest-item" style="font-size:1.1rem;">-</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="search-btn" id="search-btn">🔍 Suchen</button>
+    <button class="auto-btn" id="auto-btn">Auto-Suche: AUS</button>
+    <button class="inv-btn" id="inv-btn">📦 Inventar</button>
+    <button class="reset-btn" id="reset-btn">Fortschritt zurücksetzen</button>
+  </div>
+
+  <div class="recent-finds">
+    <h2 style="margin-bottom:15px; color:#aaa;">Letzte Funde</h2>
+    <div id="recent-list"></div>
+  </div>
+</div>
+
+<div class="modal" id="inventory-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Inventar</h2>
+      <button class="close-btn" id="close-modal">Schließen</button>
+    </div>
+    <div class="modal-body">
+      <div class="filter-bar" id="filter-bar"></div>
+      <div class="inventory-grid" id="inventory-grid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="notification" id="notification"></div>
+
+<script>
+const rarities = [
+  { name: 'Gewöhnlich', chance: 0.45, color: '#aaaaaa', weight: 1 },
+  { name: 'Ungewöhnlich', chance: 0.28, color: '#55ff55', weight: 2 },
+  { name: 'Selten', chance: 0.15, color: '#5555ff', weight: 3 },
+  { name: 'Episch', chance: 0.07, color: '#aa55ff', weight: 4 },
+  { name: 'Legendär', chance: 0.03, color: '#ffaa00', weight: 5 },
+  { name: 'Mythisch', chance: 0.012, color: '#ff5555', weight: 6 },
+  { name: 'Göttlich', chance: 0.005, color: '#ffff55', weight: 7 },
+  { name: 'Kosmisch', chance: 0.0018, color: '#55ffff', weight: 8 },
+  { name: 'Transzendent', chance: 0.0006, color: '#ff55ff', weight: 9 },
+  { name: 'Absolut', chance: 0.00005, color: '#ffffff', weight: 10 },
+  { name: 'Primordial', chance: 0.000008, color: '#ff00ff', weight: 11 },
+  { name: 'Unendlich', chance: 0.000001, color: '#00ffff', weight: 12 },
+  { name: 'Jenseits', chance: 0.0000002, color: '#ffd700', weight: 13 }
+];
+
+const prefixes = {
+  low: ['Gewöhnlich', 'Einfach', 'Schlicht', 'Normal', 'Alltäglich', 'Stumpf', 'Matt', 'Verstaubt'],
+  mid: ['Glänzend', 'Poliert', 'Alter', 'Verzaubert', 'Leuchtend', 'Selten', 'Wertvoll', 'Geheimnisvoll'],
+  high: ['Antiker', 'Mythischer', 'Göttlicher', 'Kosmisch', 'Ewiger', 'Schicksals', 'Ursprünglicher', 'Unendlicher', 'Transzendenter', 'Absoluter', 'Primordialer', 'Zeitloser', 'Dimensionen-'],
+  ultra: ['Der Letzte', 'Der Erste', 'Jenseits von', 'Aus einer anderen Realität', 'Von den Göttern verflucht', 'Aus dem Nichts geboren', 'Der Unendliche', 'Der Absolute']
+};
+
+const bases = [
+  'Quarzstein', 'Kristall', 'Blatt', 'Feder', 'Münze', 'Relikt', 'Amulett', 'Ring', 'Schwertfragment',
+  'Drachenzahn', 'Phönixfeder', 'Sternenstaub', 'Mondstein', 'Sonnenkern', 'Zeitfragment', 'Seelenstein',
+  'Runenstein', 'Portalstein', 'Weltenkern', 'Schattenessenz', 'Lichtkristall', 'Chaosfragment',
+  'Ordnungsstein', 'Lebenssamen', 'Todesblüte', 'Traumfänger', 'Erinnerungsscherbe', 'Wunschkristall',
+  'Schicksalswürfel', 'Unendlichkeitsstein', 'Voidkristall', 'Ätherfragment', 'Nexusstein',
+  'Chroniton', 'Quantenteilchen', 'Dimensionsriss', 'Realitätsbruch', 'Kosmisches Ei', 'Urstein',
+  'Götterblut', 'Dämonenherz', 'Engelsträne', 'Drachenherz', 'Phoenixasche', 'Sternenkern'
+];
+
+const suffixes = [
+  '', 'des Glücks', 'der Macht', 'der Weisheit', 'des Schicksals', 'der Ewigkeit', 'des Chaos',
+  'der Ordnung', 'der Zeit', 'des Raums', 'der Seelen', 'des Lichts', 'der Dunkelheit',
+  'der Götter', 'der Sterne', 'des Universums', 'der Unendlichkeit', 'der Realität',
+  'aus der Vergangenheit', 'aus der Zukunft', 'aus einer anderen Welt', 'des Vergessenen',
+  'der Verlorenen', 'des Ursprungs', 'des Endes', 'der Schöpfung', 'der Zerstörung'
+];
+
+let state = {
+  searches: 0,
+  items: [],
+  uniqueMap: new Map(),
+  autoInterval: null,
+  autoOn: false
+};
+
+function loadState() {
+  const saved = localStorage.getItem('infiniteCollection');
+  if (saved) {
+    const data = JSON.parse(saved);
+    state.searches = data.searches || 0;
+    state.items = data.items || [];
+    state.uniqueMap = new Map(data.unique || []);
+  }
+  updateUI();
+}
+
+function saveState() {
+  const data = {
+    searches: state.searches,
+    items: state.items.slice(-200),
+    unique: Array.from(state.uniqueMap.entries())
+  };
+  localStorage.setItem('infiniteCollection', JSON.stringify(data));
+}
+
+function rollRarity() {
+  const roll = Math.random();
+  let cumulative = 0;
+  for (const r of rarities) {
+    cumulative += r.chance;
+    if (roll < cumulative) return r;
+  }
+  return rarities[0];
+}
+
+function generateName(rarity) {
+  let prefixList, suffixList = suffixes;
+  const weight = rarity.weight;
+  
+  if (weight <= 3) prefixList = prefixes.low;
+  else if (weight <= 6) prefixList = [...prefixes.low, ...prefixes.mid];
+  else if (weight <= 9) prefixList = [...prefixes.mid, ...prefixes.high];
+  else prefixList = [...prefixes.high, ...prefixes.ultra];
+
+  const prefix = prefixList[Math.floor(Math.random() * prefixList.length)];
+  const base = bases[Math.floor(Math.random() * bases.length)];
+  let suffix = '';
+  
+  if (Math.random() > 0.4 || weight > 7) {
+    suffix = ' ' + suffixList[Math.floor(Math.random() * suffixList.length)];
+  }
+  
+  if (weight >= 10 && Math.random() > 0.7) {
+    const uniqueMods = ['#', 'α', 'Ω', '∞', '★', '✧'];
+    suffix += ' ' + uniqueMods[Math.floor(Math.random() * uniqueMods.length)] + Math.floor(Math.random() * 9999);
+  }
+
+  return `${prefix} ${base}${suffix}`.trim();
+}
+
+function search() {
+  state.searches++;
+  const rarity = rollRarity();
+  const name = generateName(rarity);
+  
+  const item = {
+    name,
+    rarity: rarity.name,
+    color: rarity.color,
+    weight: rarity.weight,
+    timestamp: Date.now(),
+    id: Date.now() + Math.random()
+  };
+
+  state.items.unshift(item);
+  if (state.items.length > 100) state.items.pop();
+
+  const key = name.toLowerCase();
+  if (state.uniqueMap.has(key)) {
+    const existing = state.uniqueMap.get(key);
+    existing.count++;
+    state.uniqueMap.set(key, existing);
+  } else {
+    state.uniqueMap.set(key, {
+      count: 1,
+      rarity: rarity.name,
+      color: rarity.color,
+      weight: rarity.weight,
+      name: name
+    });
+  }
+
+  addRecentFind(item);
+  updateUI();
+  saveState();
+
+  if (rarity.weight >= 6) {
+    showNotification(`🌟 ${rarity.name} gefunden: ${name}`);
+  }
+}
+
+function addRecentFind(item) {
+  const list = document.getElementById('recent-list');
+  const card = document.createElement('div');
+  card.className = 'find-card' + (item.weight >= 8 ? ' glow' : '');
+  card.style.borderLeftColor = item.color;
+  card.innerHTML = `
+    <div>
+      <div style="font-weight:600; color:${item.color}">${item.name}</div>
+      <div style="font-size:0.85rem; color:#aaa">vor einem Moment</div>
+    </div>
+    <span class="rarity-badge" style="background:${item.color}22; color:${item.color}; border:1px solid ${item.color}">
+      ${item.rarity}
+    </span>
+  `;
+  list.prepend(card);
+  
+  while (list.children.length > 8) {
+    list.removeChild(list.lastChild);
+  }
+}
+
+function updateUI() {
+  document.getElementById('total-searches').textContent = state.searches.toLocaleString('de-DE');
+  
+  let totalFinds = 0;
+  let rarestWeight = 0;
+  let rarestName = '-';
+  let rarestColor = '#fff';
+  
+  for (const [key, data] of state.uniqueMap) {
+    totalFinds += data.count;
+    if (data.weight > rarestWeight) {
+      rarestWeight = data.weight;
+      rarestName = data.rarity;
+      rarestColor = data.color;
+    }
+  }
+  
+  document.getElementById('total-items').textContent = totalFinds.toLocaleString('de-DE');
+  document.getElementById('unique-items').textContent = state.uniqueMap.size.toLocaleString('de-DE');
+  document.getElementById('rarest-item').textContent = rarestName;
+  document.getElementById('rarest-item').style.color = rarestColor;
+}
+
+function showNotification(text) {
+  const n = document.getElementById('notification');
+  n.textContent = text;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 4000);
+}
+
+function toggleAuto() {
+  state.autoOn = !state.autoOn;
+  const btn = document.getElementById('auto-btn');
+  if (state.autoOn) {
+    btn.textContent = 'Auto-Suche: AN';
+    btn.classList.add('active');
+    state.autoInterval = setInterval(search, 350);
+  } else {
+    btn.textContent = 'Auto-Suche: AUS';
+    btn.classList.remove('active');
+    clearInterval(state.autoInterval);
+  }
+}
+
+function openInventory() {
+  document.getElementById('inventory-modal').classList.add('active');
+  renderInventory('all');
+  renderFilters();
+}
+
+function closeInventory() {
+  document.getElementById('inventory-modal').classList.remove('active');
+}
+
+function renderFilters() {
+  const bar = document.getElementById('filter-bar');
+  bar.innerHTML = '<button class="filter-btn active" data-filter="all">Alle</button>';
+  
+  rarities.forEach(r => {
+    if (r.weight >= 1) {
+      const btn = document.createElement('button');
+      btn.className = 'filter-btn';
+      btn.dataset.filter = r.name;
+      btn.textContent = r.name;
+      btn.style.borderColor = r.color;
+      btn.onclick = () => renderInventory(r.name);
+      bar.appendChild(btn);
+    }
+  });
+  
+  bar.querySelector('[data-filter="all"]').onclick = () => renderInventory('all');
+}
+
+function renderInventory(filter) {
+  const grid = document.getElementById('inventory-grid');
+  grid.innerHTML = '';
+  
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === filter);
+  });
+
+  const uniqueItems = Array.from(state.uniqueMap.entries())
+    .map(([key, data]) => data)
+    .filter(i => filter === 'all' || i.rarity === filter)
+    .sort((a, b) => b.weight - a.weight || b.count - a.count);
+
+  if (uniqueItems.length === 0) {
+    grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#aaa; padding:40px;">Noch keine Items dieser Seltenheit gefunden.</p>';
+    return;
+  }
+
+  uniqueItems.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'inv-item';
+    el.style.borderLeftColor = item.color;
+    el.innerHTML = `
+      <div class="name" style="color:${item.color}">${item.name}</div>
+      <div class="meta">${item.rarity} • ${item.count}x gefunden</div>
+    `;
+    grid.appendChild(el);
+  });
+}
+
+function resetProgress() {
+  if (confirm('Wirklich den gesamten Fortschritt löschen? Das kann nicht rückgängig gemacht werden.')) {
+    localStorage.removeItem('infiniteCollection');
+    state = { searches: 0, items: [], uniqueMap: new Map(), autoInterval: null, autoOn: false };
+    document.getElementById('recent-list').innerHTML = '';
+    updateUI();
+    if (state.autoOn) toggleAuto();
+    showNotification('Fortschritt zurückgesetzt');
+  }
+}
+
+document.getElementById('search-btn').addEventListener('click', search);
+document.getElementById('auto-btn').addEventListener('click', toggleAuto);
+document.getElementById('inv-btn').addEventListener('click', openInventory);
+document.getElementById('close-modal').addEventListener('click', closeInventory);
+document.getElementById('reset-btn').addEventListener('click', resetProgress);
+
+document.getElementById('inventory-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'inventory-modal') closeInventory();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' && !e.repeat) {
+    e.preventDefault();
+    search();
+  }
+});
+
+loadState();
+console.log('Seltenste Items brauchen Wochen an Grinden. Viel Erfolg!');
+</script>
+</body>
+</html>
