@@ -5,106 +5,113 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Die Unendliche Sammlung</title>
 <style>
-:root { --bg:#0f0f1a; --card:#1a1a2e; --accent:#6c5ce7; --text:#e0e0ff; }
+:root { --bg:#0d0d1a; --card:#16162a; --accent:#7c5cff; --text:#e8e8ff; --muted:#8888aa; }
 * { box-sizing:border-box; margin:0; padding:0; }
-body { font-family:system-ui,sans-serif; background:linear-gradient(135deg,#0f0f1a,#1a0a2e); color:var(--text); min-height:100vh; padding:12px; }
-.container { max-width:1300px; margin:0 auto; }
-header { text-align:center; margin-bottom:16px; padding:14px; background:rgba(26,26,46,.85); border-radius:16px; border:1px solid #333; }
-h1 { font-size:2rem; background:linear-gradient(90deg,#6c5ce7,#a29bfe); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin:16px 0; }
-.stat-card { background:var(--card); padding:10px; border-radius:12px; text-align:center; border:1px solid #333; }
-.stat-card h3 { font-size:.75rem; color:#aaa; }
-.stat-card .value { font-size:1.3rem; font-weight:bold; color:var(--accent); }
-.controls { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:16px 0; }
-button { padding:10px 18px; font-size:.95rem; border:none; border-radius:10px; cursor:pointer; font-weight:600; transition:.2s; }
-.search-btn { background:linear-gradient(135deg,#6c5ce7,#a29bfe); color:#fff; min-width:150px; }
-.auto-btn,.inv-btn,.ach-btn,.upg-btn,.bio-btn,.skill-btn { background:#2d2d4a; color:var(--text); border:1px solid #444; }
-.auto-btn.active { background:#00b894; color:#fff; }
-.recent-finds { margin:16px 0; }
-.find-card { background:var(--card); border-radius:10px; padding:10px 14px; margin:6px 0; display:flex; justify-content:space-between; align-items:center; border-left:5px solid; animation:slideIn .35s; }
-@keyframes slideIn { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
-.rarity-badge { padding:2px 8px; border-radius:12px; font-size:.75rem; font-weight:bold; text-transform:uppercase; }
-.modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:1000; justify-content:center; align-items:center; }
-.modal.active { display:flex; }
-.modal-content { background:var(--card); border-radius:16px; width:94%; max-width:1100px; max-height:90vh; overflow:hidden; display:flex; flex-direction:column; border:1px solid #444; }
-.modal-header { padding:14px 18px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center; }
-.modal-body { padding:14px; overflow-y:auto; flex:1; }
-.skill-tree { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; }
-.branch { background:#1e1e32; border-radius:12px; padding:12px; min-width:200px; border:1px solid #333; }
-.branch h3 { text-align:center; margin-bottom:10px; color:#a29bfe; font-size:1.05rem; }
-.skill-node { background:#252540; border:2px solid #444; border-radius:8px; padding:8px; margin:6px 0; cursor:pointer; font-size:.85rem; transition:.15s; }
-.skill-node:hover { border-color:#6c5ce7; }
-.skill-node.unlocked { border-color:#00b894; background:#1a3a2a; }
-.skill-node.available { border-color:#ffaa00; }
-.skill-node.locked { opacity:.5; cursor:not-allowed; }
-.skill-node .cost { font-size:.75rem; color:#aaa; }
-.inventory-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:8px; }
-.inv-item { background:#252540; border-radius:8px; padding:8px; border-left:4px solid; font-size:.85rem; }
-.notification { position:fixed; top:12px; right:12px; background:#00b894; color:#fff; padding:10px 16px; border-radius:8px; transform:translateX(400px); transition:.35s; z-index:2000; font-weight:600; max-width:300px; }
+body { font-family:system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+.nav { background:#12122a; border-bottom:1px solid #2a2a44; padding:12px 20px; display:flex; gap:8px; overflow-x:auto; position:sticky; top:0; z-index:100; }
+.nav button { background:transparent; border:none; color:var(--muted); padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:600; white-space:nowrap; transition:.2s; }
+.nav button.active { background:var(--accent); color:#fff; }
+.nav button:hover { color:#fff; background:#2a2a44; }
+.page { display:none; padding:20px; max-width:1200px; margin:0 auto; }
+.page.active { display:block; }
+header { text-align:center; margin-bottom:24px; }
+h1 { font-size:2.4rem; background:linear-gradient(90deg,#7c5cff,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.subtitle { color:var(--muted); margin-top:6px; }
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:20px 0; }
+.stat-card { background:var(--card); padding:16px; border-radius:14px; text-align:center; border:1px solid #2a2a44; }
+.stat-card h3 { font-size:.8rem; color:var(--muted); margin-bottom:6px; }
+.stat-card .value { font-size:1.5rem; font-weight:700; color:var(--accent); }
+.controls { display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin:24px 0; }
+button.action { padding:14px 28px; font-size:1.1rem; border:none; border-radius:12px; cursor:pointer; font-weight:600; transition:.2s; }
+.search-btn { background:linear-gradient(135deg,#7c5cff,#a78bfa); color:#fff; box-shadow:0 4px 20px rgba(124,92,255,.3); }
+.search-btn:hover { transform:translateY(-2px); }
+.auto-btn { background:#2a2a44; color:var(--text); border:1px solid #444; }
+.auto-btn.active { background:#10b981; color:#fff; }
+.recent { margin-top:30px; }
+.find-card { background:var(--card); border-radius:12px; padding:14px 18px; margin:10px 0; display:flex; justify-content:space-between; align-items:center; border-left:5px solid; animation:slideIn .4s; }
+@keyframes slideIn { from { opacity:0; transform:translateY(-15px); } to { opacity:1; transform:translateY(0); } }
+.rarity-badge { padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:700; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+.card { background:var(--card); border-radius:12px; padding:14px; border:1px solid #2a2a44; }
+.skill-node { background:#1e1e32; border:2px solid #333; border-radius:10px; padding:12px; margin:8px 0; cursor:pointer; transition:.15s; }
+.skill-node.unlocked { border-color:#10b981; background:#1a3a2a; }
+.skill-node.available { border-color:#f59e0b; }
+.skill-node.locked { opacity:.55; cursor:not-allowed; }
+.notification { position:fixed; top:70px; right:20px; background:#10b981; color:#fff; padding:12px 20px; border-radius:10px; transform:translateX(400px); transition:.4s; z-index:200; font-weight:600; }
 .notification.show { transform:translateX(0); }
-.progress-bar { height:6px; background:#333; border-radius:3px; margin-top:4px; overflow:hidden; }
-.progress-fill { height:100%; background:var(--accent); }
-.search-box { width:100%; padding:6px 10px; margin-bottom:8px; border-radius:6px; border:1px solid #444; background:#1a1a2e; color:var(--text); }
+.progress-bar { height:8px; background:#2a2a44; border-radius:4px; margin-top:6px; overflow:hidden; }
+.progress-fill { height:100%; background:var(--accent); transition:width .3s; }
+.search-box { width:100%; padding:10px 14px; border-radius:10px; border:1px solid #333; background:#1a1a2e; color:var(--text); margin-bottom:12px; }
+.filter-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+.filter-btn { padding:6px 14px; border-radius:20px; background:#2a2a44; border:1px solid #444; color:var(--text); cursor:pointer; font-size:.85rem; }
+.filter-btn.active { background:var(--accent); }
+.biome-card { cursor:pointer; transition:.2s; }
+.biome-card:hover { border-color:var(--accent); }
+.biome-card.active { border-color:#10b981; }
 </style>
 </head>
 <body>
-<div class="container">
+<nav class="nav">
+  <button class="nav-btn active" data-page="home">🏠 Suche</button>
+  <button class="nav-btn" data-page="inventory">📦 Inventar</button>
+  <button class="nav-btn" data-page="skills">🌳 Skilltree</button>
+  <button class="nav-btn" data-page="achievements">🏆 Achievements</button>
+  <button class="nav-btn" data-page="biomes">🌍 Biome</button>
+  <button class="nav-btn" data-page="stats">📊 Stats</button>
+</nav>
+
+<div class="page active" id="page-home">
   <header>
     <h1>Die Unendliche Sammlung</h1>
-    <p style="color:#aaa;margin-top:4px;">Sammle alles – jetzt mit Riesen-Skilltree!</p>
-    <div style="margin-top:8px;font-size:.85rem;color:#aaa;">Level <span id="player-level">1</span> • Glück: <span id="luck-mult">1.00</span>x • Biome: <span id="current-biome">Wald</span> • Skillpunkte: <span id="skill-points">0</span></div>
+    <p class="subtitle">Sammle gewöhnliche bis jenseits-seltene Artefakte</p>
+    <div style="margin-top:10px;color:var(--muted);font-size:.9rem;">Level <span id="player-level">1</span> • Glück: <span id="luck-mult">1.00</span>x • Biome: <span id="current-biome">Wald</span> • SP: <span id="skill-points">0</span></div>
   </header>
   <div class="stats">
     <div class="stat-card"><h3>Suchen</h3><div class="value" id="total-searches">0</div></div>
     <div class="stat-card"><h3>Items</h3><div class="value" id="total-items">0</div></div>
     <div class="stat-card"><h3>Einzigartig</h3><div class="value" id="unique-items">0</div></div>
-    <div class="stat-card"><h3>Seltenstes</h3><div class="value" id="rarest-item" style="font-size:.95rem;">-</div></div>
+    <div class="stat-card"><h3>Seltenstes</h3><div class="value" id="rarest-item" style="font-size:1.1rem;">-</div></div>
     <div class="stat-card"><h3>XP</h3><div class="value" id="xp-display">0</div><div class="progress-bar"><div class="progress-fill" id="xp-bar" style="width:0%"></div></div></div>
   </div>
   <div class="controls">
-    <button class="search-btn" id="search-btn">🔍 Suchen (x<span id="search-power">1</span>)</button>
-    <button class="auto-btn" id="auto-btn">Auto: AUS</button>
-    <button class="bio-btn" id="bio-btn">🌍 Biome</button>
-    <button class="inv-btn" id="inv-btn">📦 Inventar</button>
-    <button class="ach-btn" id="ach-btn">🏆 Achievements</button>
-    <button class="skill-btn" id="skill-btn">🌳 Skilltree</button>
-    <button class="reset-btn" id="reset-btn" style="background:transparent;color:#e74c3c;border:1px solid #e74c3c;padding:8px 14px;">Reset</button>
+    <button class="action search-btn" id="search-btn">🔍 Suchen (x<span id="search-power">1</span>)</button>
+    <button class="action auto-btn" id="auto-btn">Auto-Suche: AUS</button>
+    <button class="action" style="background:transparent;color:#ef4444;border:1px solid #ef4444;" id="reset-btn">Reset</button>
   </div>
-  <div class="recent-finds">
-    <h2 style="margin-bottom:8px;color:#aaa;font-size:1rem;">Letzte Funde</h2>
+  <div class="recent">
+    <h2 style="margin-bottom:12px;color:var(--muted);">Letzte Funde</h2>
     <div id="recent-list"></div>
   </div>
 </div>
 
-<div class="modal" id="skill-modal">
-  <div class="modal-content">
-    <div class="modal-header"><h2>Riesen Skilltree</h2><button class="close-btn" data-close style="background:#e74c3c;color:#fff;padding:6px 12px;border-radius:8px;">Schließen</button></div>
-    <div class="modal-body"><div class="skill-tree" id="skill-tree"></div></div>
-  </div>
+<div class="page" id="page-inventory">
+  <h2 style="margin-bottom:16px;">📦 Inventar</h2>
+  <input class="search-box" id="inv-search" placeholder="Item suchen...">
+  <div class="filter-bar" id="filter-bar"></div>
+  <div class="grid" id="inventory-grid"></div>
 </div>
 
-<div class="modal" id="inventory-modal">
-  <div class="modal-content">
-    <div class="modal-header"><h2>Inventar</h2><button class="close-btn" data-close style="background:#e74c3c;color:#fff;padding:6px 12px;border-radius:8px;">Schließen</button></div>
-    <div class="modal-body">
-      <input class="search-box" id="inv-search" placeholder="Suchen...">
-      <div class="filter-bar" id="filter-bar" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"></div>
-      <div class="inventory-grid" id="inventory-grid"></div>
-    </div>
-  </div>
+<div class="page" id="page-skills">
+  <h2 style="margin-bottom:16px;">🌳 Skilltree</h2>
+  <div id="skill-tree" style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;"></div>
 </div>
 
-<div class="modal" id="ach-modal">
-  <div class="modal-content">
-    <div class="modal-header"><h2>Achievements</h2><button class="close-btn" data-close style="background:#e74c3c;color:#fff;padding:6px 12px;border-radius:8px;">Schließen</button></div>
-    <div class="modal-body" id="ach-list"></div>
-  </div>
+<div class="page" id="page-achievements">
+  <h2 style="margin-bottom:16px;">🏆 Achievements</h2>
+  <div id="ach-list" class="grid"></div>
 </div>
 
-<div class="modal" id="bio-modal">
-  <div class="modal-content">
-    <div class="modal-header"><h2>Biome</h2><button class="close-btn" data-close style="background:#e74c3c;color:#fff;padding:6px 12px;border-radius:8px;">Schließen</button></div>
-    <div class="modal-body" id="bio-list"></div>
+<div class="page" id="page-biomes">
+  <h2 style="margin-bottom:16px;">🌍 Biome</h2>
+  <div id="bio-list" class="grid"></div>
+</div>
+
+<div class="page" id="page-stats">
+  <h2 style="margin-bottom:16px;">📊 Statistiken</h2>
+  <div class="stats" id="extra-stats"></div>
+  <div style="margin-top:20px;">
+    <button class="action" style="background:#2a2a44;" onclick="exportSave()">Export Speichern</button>
+    <textarea id="export-box" readonly style="width:100%;height:100px;margin-top:10px;background:#1a1a2e;color:#ccc;border:1px solid #333;border-radius:8px;padding:10px;"></textarea>
   </div>
 </div>
 
@@ -128,12 +135,12 @@ const rarities = [
 ];
 
 const biomes = [
-  {id:'wald',name:'Wald',unlock:0,rareBonus:1.0,desc:'Startbiome'},
-  {id:'hoehle',name:'Höhle',unlock:40,rareBonus:1.2,desc:'+Seltenheiten'},
-  {id:'ruinen',name:'Ruinen',unlock:150,rareBonus:1.4,desc:'Relikte'},
-  {id:'berg',name:'Berggipfel',unlock:400,rareBonus:1.7,desc:'Hohe Rares'},
-  {id:'void',name:'Void',unlock:1200,rareBonus:2.1,desc:'Extrem'},
-  {id:'kosmos',name:'Kosmos',unlock:4000,rareBonus:2.6,desc:'Endgame'}
+  {id:'wald',name:'🌲 Wald',unlock:0,rareBonus:1.0,desc:'Startbiome – gewöhnliche Funde'},
+  {id:'hoehle',name:'🕳️ Höhle',unlock:40,rareBonus:1.2,desc:'Mehr Seltenheiten in der Dunkelheit'},
+  {id:'ruinen',name:'🏛️ Ruinen',unlock:150,rareBonus:1.4,desc:'Relikte und Artefakte'},
+  {id:'berg',name:'⛰️ Berggipfel',unlock:400,rareBonus:1.7,desc:'Hohe Chancen auf Epische+'},
+  {id:'void',name:'🌀 Void',unlock:1200,rareBonus:2.1,desc:'Extrem seltene Dinge'},
+  {id:'kosmos',name:'🌌 Kosmos',unlock:4000,rareBonus:2.6,desc:'Endgame-Biome'}
 ];
 
 const categories = ['Artefakt','Material','Kreatur','Relikt','Waffe','Rüstung','Essenz','Fragment'];
@@ -164,7 +171,7 @@ const skills = [
   {id:'o2',branch:'Offline',name:'Tiefer Schlaf',desc:'+Offline',cost:3,req:['o1'],effect:{offline:0.3}},
   {id:'o3',branch:'Offline',name:'Traumwandler',desc:'+Offline',cost:5,req:['o2'],effect:{offline:0.4}},
   {id:'o4',branch:'Offline',name:'Ewiger Traum',desc:'Max Offline',cost:8,req:['o3'],effect:{offline:0.5}},
-  {id:'c1',branch:'Sammlung',name:'Sammler',desc:'+5% Unique Chance',cost:2,req:[],effect:{unique:0.05}},
+  {id:'c1',branch:'Sammlung',name:'Sammler',desc:'+5% Unique',cost:2,req:[],effect:{unique:0.05}},
   {id:'c2',branch:'Sammlung',name:'Archivar',desc:'+5% Unique',cost:3,req:['c1'],effect:{unique:0.05}},
   {id:'c3',branch:'Sammlung',name:'Kurator',desc:'+8% Unique',cost:5,req:['c2'],effect:{unique:0.08}},
   {id:'c4',branch:'Sammlung',name:'Meister-Sammler',desc:'+10% Unique',cost:8,req:['c3'],effect:{unique:0.10}},
@@ -197,7 +204,6 @@ let state = {
 };
 
 function hasRarity(s,w){ for(const d of s.uniqueMap.values()) if(d.weight>=w) return true; return false; }
-
 function getSkillEffects(){
   let e = {power:0, luck:0, xp:0, offline:0, unique:0, biome:0};
   state.unlockedSkills.forEach(id=>{
@@ -328,7 +334,7 @@ function addRecentFind(item){
   const card=document.createElement('div');
   card.className='find-card';
   card.style.borderLeftColor=item.color;
-  card.innerHTML=`<div><div style="font-weight:600;color:${item.color}">${item.name}</div><div style="font-size:.75rem;color:#aaa">${item.category}</div></div><span class="rarity-badge" style="background:${item.color}22;color:${item.color};border:1px solid ${item.color}">${item.rarity}</span>`;
+  card.innerHTML=`<div><div style="font-weight:600;color:${item.color}">${item.name}</div><div style="font-size:.8rem;color:var(--muted)">${item.category}</div></div><span class="rarity-badge" style="background:${item.color}22;color:${item.color};border:1px solid ${item.color}">${item.rarity}</span>`;
   list.prepend(card);
   while(list.children.length>5) list.removeChild(list.lastChild);
 }
@@ -360,12 +366,9 @@ function showNotification(t){
 function toggleAuto(){
   state.autoOn=!state.autoOn;
   const btn=document.getElementById('auto-btn');
-  if(state.autoOn){ btn.textContent='Auto: AN'; btn.classList.add('active'); state.autoInterval=setInterval(()=>doSearch(true),380); }
-  else { btn.textContent='Auto: AUS'; btn.classList.remove('active'); clearInterval(state.autoInterval); }
+  if(state.autoOn){ btn.textContent='Auto-Suche: AN'; btn.classList.add('active'); state.autoInterval=setInterval(()=>doSearch(true),380); }
+  else { btn.textContent='Auto-Suche: AUS'; btn.classList.remove('active'); clearInterval(state.autoInterval); }
 }
-
-function openModal(id){ document.getElementById(id).classList.add('active'); }
-function closeModals(){ document.querySelectorAll('.modal').forEach(m=>m.classList.remove('active')); }
 
 function renderSkills(){
   const tree=document.getElementById('skill-tree');
@@ -373,14 +376,14 @@ function renderSkills(){
   const branches=[...new Set(skills.map(s=>s.branch))];
   branches.forEach(br=>{
     const div=document.createElement('div');
-    div.className='branch';
-    div.innerHTML=`<h3>${br}</h3>`;
+    div.style.cssText='background:#1a1a2e;border-radius:14px;padding:16px;min-width:220px;border:1px solid #2a2a44;';
+    div.innerHTML=`<h3 style="text-align:center;margin-bottom:12px;color:#a78bfa;">${br}</h3>`;
     skills.filter(s=>s.branch===br).forEach(sk=>{
       const unlocked=state.unlockedSkills.includes(sk.id);
       const canBuy=!unlocked && state.skillPoints>=sk.cost && sk.req.every(r=>state.unlockedSkills.includes(r));
       const node=document.createElement('div');
       node.className='skill-node '+(unlocked?'unlocked':canBuy?'available':'locked');
-      node.innerHTML=`<strong>${sk.name}</strong><div style="font-size:.75rem;color:#aaa;margin:2px 0;">${sk.desc}</div><div class="cost">Kosten: ${sk.cost} SP ${unlocked?'✅':''}</div>`;
+      node.innerHTML=`<strong>${sk.name}</strong><div style="font-size:.8rem;color:var(--muted);margin:4px 0;">${sk.desc}</div><div style="font-size:.75rem;color:#aaa;">Kosten: ${sk.cost} SP ${unlocked?'✅':''}</div>`;
       if(canBuy) node.onclick=()=>{
         state.skillPoints-=sk.cost;
         state.unlockedSkills.push(sk.id);
@@ -399,25 +402,24 @@ function renderInventory(filter='all', search=''){
   const items=Array.from(state.uniqueMap.values())
     .filter(i=>(filter==='all'||i.rarity===filter) && i.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a,b)=>b.weight-a.weight||b.count-a.count);
-  if(!items.length){ grid.innerHTML='<p style="grid-column:1/-1;text-align:center;color:#aaa;padding:20px;">Nichts gefunden.</p>'; return; }
+  if(!items.length){ grid.innerHTML='<p style="grid-column:1/-1;text-align:center;color:var(--muted);padding:40px;">Keine Items gefunden.</p>'; return; }
   items.forEach(it=>{
     const el=document.createElement('div');
-    el.className='inv-item';
-    el.style.borderLeftColor=it.color;
-    el.innerHTML=`<div style="font-weight:600;color:${it.color}">${it.name}</div><div style="font-size:.75rem;color:#aaa;">${it.category||''} • ${it.rarity} • ${it.count}x</div>`;
+    el.className='card';
+    el.style.borderLeft=`4px solid ${it.color}`;
+    el.innerHTML=`<div style="font-weight:600;color:${it.color}">${it.name}</div><div style="font-size:.8rem;color:var(--muted);margin-top:4px;">${it.category||''} • ${it.rarity} • ${it.count}x</div>`;
     grid.appendChild(el);
   });
 }
 
 function renderFilters(){
   const bar=document.getElementById('filter-bar');
-  bar.innerHTML='<button class="filter-btn active" data-f="all" style="padding:4px 10px;border-radius:12px;background:#2d2d4a;border:1px solid #444;cursor:pointer;">Alle</button>';
+  bar.innerHTML='<button class="filter-btn active" data-f="all">Alle</button>';
   rarities.forEach(r=>{
     const b=document.createElement('button');
     b.className='filter-btn';
     b.dataset.f=r.name;
     b.textContent=r.name;
-    b.style.cssText='padding:4px 10px;border-radius:12px;background:#2d2d4a;border:1px solid #444;cursor:pointer;';
     b.onclick=()=>{renderInventory(r.name,document.getElementById('inv-search').value); document.querySelectorAll('.filter-btn').forEach(x=>x.classList.toggle('active',x.dataset.f===r.name));};
     bar.appendChild(b);
   });
@@ -430,8 +432,9 @@ function renderAchievements(){
   achievements.forEach(a=>{
     const un=state.unlockedAchievements.includes(a.id);
     const el=document.createElement('div');
-    el.style.cssText='background:#252540;border-radius:8px;padding:10px;margin:6px 0;opacity:'+(un?1:0.5);
-    el.innerHTML=`<strong>${un?'✅':'🔒'} ${a.name}</strong><div style="font-size:.8rem;color:#aaa;">${a.desc}</div>`;
+    el.className='card';
+    el.style.opacity=un?1:0.55;
+    el.innerHTML=`<strong>${un?'✅':'🔒'} ${a.name}</strong><div style="font-size:.85rem;color:var(--muted);margin-top:6px;">${a.desc}</div>`;
     list.appendChild(el);
   });
 }
@@ -443,27 +446,39 @@ function renderBiomes(){
     const un=state.unlockedBiomes.includes(b.id);
     const act=state.currentBiome===b.id;
     const el=document.createElement('div');
-    el.style.cssText=`background:#252540;border-radius:8px;padding:10px;margin:6px 0;border:1px solid ${act?'#6c5ce7':'#444'};opacity:${un?1:0.45};cursor:${un?'pointer':'default'}`;
-    el.innerHTML=`<strong>${b.name}</strong> ${un?'':'(gesperrt)'}<div style="font-size:.8rem;color:#aaa;margin-top:4px;">${b.desc} • Bonus x${b.rareBonus} • Unlock bei ${b.unlock} Suchen</div>`;
-    if(un) el.onclick=()=>{state.currentBiome=b.id; updateUI(); saveState(); renderBiomes(); showNotification('Biome: '+b.name);};
+    el.className='card biome-card'+(act?' active':'');
+    el.style.opacity=un?1:0.5;
+    el.innerHTML=`<strong>${b.name}</strong><div style="font-size:.85rem;color:var(--muted);margin-top:6px;">${b.desc}<br>Bonus: x${b.rareBonus} • Unlock: ${b.unlock} Suchen</div>`;
+    if(un) el.onclick=()=>{state.currentBiome=b.id; updateUI(); saveState(); renderBiomes(); showNotification('Biome gewechselt: '+b.name);};
     list.appendChild(el);
   });
 }
 
+function exportSave(){
+  document.getElementById('export-box').value = btoa(JSON.stringify(localStorage.getItem('infiniteCollection')));
+}
+
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-'+btn.dataset.page).classList.add('active');
+    if(btn.dataset.page==='inventory'){ renderFilters(); renderInventory(); }
+    if(btn.dataset.page==='skills') renderSkills();
+    if(btn.dataset.page==='achievements') renderAchievements();
+    if(btn.dataset.page==='biomes') renderBiomes();
+  };
+});
+
 document.getElementById('search-btn').onclick=()=>doSearch(true);
 document.getElementById('auto-btn').onclick=toggleAuto;
-document.getElementById('inv-btn').onclick=()=>{openModal('inventory-modal'); renderFilters(); renderInventory();};
-document.getElementById('ach-btn').onclick=()=>{openModal('ach-modal'); renderAchievements();};
-document.getElementById('skill-btn').onclick=()=>{openModal('skill-modal'); renderSkills();};
-document.getElementById('bio-btn').onclick=()=>{openModal('bio-modal'); renderBiomes();};
-document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModals);
-document.querySelectorAll('.modal').forEach(m=>m.onclick=e=>{if(e.target===m) closeModals();});
 document.getElementById('inv-search').oninput=e=>renderInventory(document.querySelector('.filter-btn.active')?.dataset.f||'all',e.target.value);
 document.getElementById('reset-btn').onclick=()=>{if(confirm('Alles zurücksetzen?')){localStorage.removeItem('infiniteCollection');location.reload();}};
-document.addEventListener('keydown',e=>{if(e.code==='Space' && !e.repeat && !['INPUT','TEXTAREA'].includes(document.activeElement.tagName)){e.preventDefault();doSearch(true);}});
+document.addEventListener('keydown',e=>{if(e.code==='Space' && !e.repeat && document.activeElement.tagName!=='INPUT' && document.activeElement.tagName!=='TEXTAREA'){e.preventDefault();doSearch(true);}});
 
 loadState();
-console.log('Riesen-Skilltree geladen!');
+console.log('Moderne UI geladen!');
 </script>
 </body>
 </html>
