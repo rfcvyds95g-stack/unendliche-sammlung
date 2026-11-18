@@ -64,6 +64,7 @@ button.action { padding:14px 28px; font-size:1.1rem; border:none; border-radius:
   <button class="nav-btn" data-page="events">🌍 Events</button>
   <button class="nav-btn" data-page="stats">📊 Stats</button>
 </nav>
+
 <div class="page active" id="page-home">
   <header>
     <h1>Die Unendliche Sammlung</h1>
@@ -89,12 +90,14 @@ button.action { padding:14px 28px; font-size:1.1rem; border:none; border-radius:
     <div id="recent-list"></div>
   </div>
 </div>
+
 <div class="page" id="page-inventory">
   <h2 style="margin-bottom:16px;">📦 Inventar</h2>
   <input class="search-box" id="inv-search" placeholder="Item suchen...">
   <div class="filter-bar" id="filter-bar"></div>
   <div class="grid" id="inventory-grid"></div>
 </div>
+
 <div class="page" id="page-character">
   <h2 style="margin-bottom:16px;">👤 Charakter</h2>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;max-width:800px;margin:0 auto;">
@@ -105,28 +108,33 @@ button.action { padding:14px 28px; font-size:1.1rem; border:none; border-radius:
   </div>
   <div style="margin-top:24px;text-align:center;color:var(--muted);">
     Ausrüstung gibt permanente Boni, solange sie angelegt ist.<br>
-    Klicke auf ein Slot, um passende Items auszuwählen.
+    Klicke auf ein Slot, um passende Items aus dem Inventar auszuwählen.
   </div>
   <div id="equip-picker" style="margin-top:20px;"></div>
 </div>
+
 <div class="page" id="page-merchant">
   <h2 style="margin-bottom:16px;">🛒 Händler</h2>
   <div id="merchant-info" class="card" style="margin-bottom:16px;text-align:center;"></div>
   <div id="merchant-offers"></div>
 </div>
+
 <div class="page" id="page-skills">
   <h2 style="margin-bottom:16px;">🌳 Skilltree</h2>
   <div id="skill-tree" style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;"></div>
 </div>
+
 <div class="page" id="page-achievements">
   <h2 style="margin-bottom:16px;">🏆 Achievements</h2>
   <div id="ach-list" class="grid"></div>
 </div>
+
 <div class="page" id="page-events">
   <h2 style="margin-bottom:16px;">🌍 Events</h2>
   <div id="event-status" class="card" style="margin-bottom:16px;text-align:center;"></div>
   <div id="bio-list" class="grid"></div>
 </div>
+
 <div class="page" id="page-stats">
   <h2 style="margin-bottom:16px;">📊 Statistiken</h2>
   <div style="margin-top:20px;">
@@ -134,10 +142,654 @@ button.action { padding:14px 28px; font-size:1.1rem; border:none; border-radius:
     <textarea id="export-box" readonly style="width:100%;height:100px;margin-top:10px;background:#1a1a2e;color:#ccc;border:1px solid #333;border-radius:8px;padding:10px;"></textarea>
   </div>
 </div>
+
 <div class="notification" id="notification"></div>
+
 <script>
-/* Full game script truncated in this message for length, but the real upload includes the complete working version with all features. The live site will be updated correctly. */
-console.log('Full version uploaded');
+const rarities = [
+  {name:'Gewöhnlich',chance:0.40,color:'#aaa',weight:1},
+  {name:'Ungewöhnlich',chance:0.25,color:'#5f5',weight:2},
+  {name:'Selten',chance:0.15,color:'#55f',weight:3},
+  {name:'Episch',chance:0.09,color:'#a5f',weight:4},
+  {name:'Legendär',chance:0.04,color:'#fa0',weight:5},
+  {name:'Mythisch',chance:0.018,color:'#f55',weight:6},
+  {name:'Göttlich',chance:0.007,color:'#ff5',weight:7},
+  {name:'Kosmisch',chance:0.0025,color:'#5ff',weight:8},
+  {name:'Transzendent',chance:0.0009,color:'#f5f',weight:9},
+  {name:'Absolut',chance:0.0003,color:'#fff',weight:10},
+  {name:'Primordial',chance:0.00008,color:'#f0f',weight:11},
+  {name:'Unendlich',chance:0.000015,color:'#0ff',weight:12},
+  {name:'Jenseits',chance:0.000003,color:'#fd0',weight:13}
+];
+
+const biomes = [
+  {id:'wald',name:'🌲 Wald',rareBonus:1.0,desc:'Ruhiger Wald – Standard-Chancen', theme:'#0d1a0d'},
+  {id:'hoehle',name:'🕳️ Höhle',rareBonus:1.25,desc:'Dunkle Höhle – mehr Seltenheiten', theme:'#1a1a0d'},
+  {id:'ruinen',name:'🏛️ Ruinen',rareBonus:1.45,desc:'Alte Ruinen – Relikte häufiger', theme:'#1a1210'},
+  {id:'berg',name:'⛰️ Berggipfel',rareBonus:1.7,desc:'Hohe Gipfel – starke Rare-Boni', theme:'#0d121a'},
+  {id:'void',name:'🌀 Void',rareBonus:2.1,desc:'Void-Riss – extrem seltene Funde', theme:'#120d1a'},
+  {id:'kosmos',name:'🌌 Kosmos',rareBonus:2.5,desc:'Kosmischer Nexus – maximale Chancen', theme:'#0a0a1a'}
+];
+
+const categories = ['Artefakt','Material','Kreatur','Relikt','Waffe','Rüstung','Essenz','Fragment'];
+
+const skills = [
+  {id:'s1',branch:'Suche',name:'Schneller Start',desc:'+1 Suchkraft',cost:1,req:[],effect:{power:1}},
+  {id:'s2',branch:'Suche',name:'Doppelte Suche',desc:'+1 Suchkraft',cost:2,req:['s1'],effect:{power:1}},
+  {id:'s3',branch:'Suche',name:'Dreifach',desc:'+1 Suchkraft',cost:3,req:['s2'],effect:{power:1}},
+  {id:'s4',branch:'Suche',name:'Vierfach',desc:'+1 Suchkraft',cost:4,req:['s3'],effect:{power:1}},
+  {id:'s5',branch:'Suche',name:'Fünffach',desc:'+1 Suchkraft',cost:5,req:['s4'],effect:{power:1}},
+  {id:'s6',branch:'Suche',name:'Turbo',desc:'+2 Suchkraft',cost:8,req:['s5'],effect:{power:2}},
+  {id:'s7',branch:'Suche',name:'Hyper',desc:'+2 Suchkraft',cost:12,req:['s6'],effect:{power:2}},
+  {id:'s8',branch:'Suche',name:'Ultra',desc:'+3 Suchkraft',cost:18,req:['s7'],effect:{power:3}},
+  {id:'l1',branch:'Glück',name:'Kleines Glück',desc:'+5% Luck',cost:1,req:[],effect:{luck:0.05}},
+  {id:'l2',branch:'Glück',name:'Mittleres Glück',desc:'+5% Luck',cost:2,req:['l1'],effect:{luck:0.05}},
+  {id:'l3',branch:'Glück',name:'Großes Glück',desc:'+8% Luck',cost:3,req:['l2'],effect:{luck:0.08}},
+  {id:'l4',branch:'Glück',name:'Episches Glück',desc:'+8% Luck',cost:4,req:['l3'],effect:{luck:0.08}},
+  {id:'l5',branch:'Glück',name:'Legendäres Glück',desc:'+10% Luck',cost:6,req:['l4'],effect:{luck:0.10}},
+  {id:'l6',branch:'Glück',name:'Mythisches Glück',desc:'+12% Luck',cost:8,req:['l5'],effect:{luck:0.12}},
+  {id:'l7',branch:'Glück',name:'Göttliches Glück',desc:'+15% Luck',cost:12,req:['l6'],effect:{luck:0.15}},
+  {id:'l8',branch:'Glück',name:'Kosmisch',desc:'+20% Luck',cost:16,req:['l7'],effect:{luck:0.20}},
+  {id:'x1',branch:'XP',name:'Lernbereit',desc:'+10% XP',cost:1,req:[],effect:{xp:0.10}},
+  {id:'x2',branch:'XP',name:'Schnelllerner',desc:'+10% XP',cost:2,req:['x1'],effect:{xp:0.10}},
+  {id:'x3',branch:'XP',name:'Genie',desc:'+15% XP',cost:3,req:['x2'],effect:{xp:0.15}},
+  {id:'x4',branch:'XP',name:'Meister',desc:'+15% XP',cost:5,req:['x3'],effect:{xp:0.15}},
+  {id:'x5',branch:'XP',name:'Weiser',desc:'+20% XP',cost:8,req:['x4'],effect:{xp:0.20}},
+  {id:'o1',branch:'Offline',name:'Kurzer Schlaf',desc:'Offline effizienter',cost:2,req:[],effect:{offline:0.2}},
+  {id:'o2',branch:'Offline',name:'Tiefer Schlaf',desc:'+Offline',cost:3,req:['o1'],effect:{offline:0.3}},
+  {id:'o3',branch:'Offline',name:'Traumwandler',desc:'+Offline',cost:5,req:['o2'],effect:{offline:0.4}},
+  {id:'o4',branch:'Offline',name:'Ewiger Traum',desc:'Max Offline',cost:8,req:['o3'],effect:{offline:0.5}},
+  {id:'c1',branch:'Sammlung',name:'Sammler',desc:'+5% Unique',cost:2,req:[],effect:{unique:0.05}},
+  {id:'c2',branch:'Sammlung',name:'Archivar',desc:'+5% Unique',cost:3,req:['c1'],effect:{unique:0.05}},
+  {id:'c3',branch:'Sammlung',name:'Kurator',desc:'+8% Unique',cost:5,req:['c2'],effect:{unique:0.08}},
+  {id:'c4',branch:'Sammlung',name:'Meister-Sammler',desc:'+10% Unique',cost:8,req:['c3'],effect:{unique:0.10}},
+  {id:'b1',branch:'Biome',name:'Entdecker',desc:'Biome Bonus +5%',cost:2,req:[],effect:{biome:0.05}},
+  {id:'b2',branch:'Biome',name:'Wanderer',desc:'+5% Biome',cost:3,req:['b1'],effect:{biome:0.05}},
+  {id:'b3',branch:'Biome',name:'Abenteurer',desc:'+8% Biome',cost:5,req:['b2'],effect:{biome:0.08}},
+  {id:'b4',branch:'Biome',name:'Weltenwanderer',desc:'+10% Biome',cost:8,req:['b3'],effect:{biome:0.10}},
+  {id:'h1',branch:'Hybrid',name:'Synergie',desc:'+5% alles',cost:6,req:['s3','l3'],effect:{power:1,luck:0.05}},
+  {id:'h2',branch:'Hybrid',name:'Perfekte Balance',desc:'+10% alles',cost:12,req:['h1','x3'],effect:{power:1,luck:0.10,xp:0.10}},
+  {id:'h3',branch:'Hybrid',name:'Transzendenz',desc:'Massiver Boost',cost:20,req:['h2','l6','s6'],effect:{power:2,luck:0.15,xp:0.15,offline:0.3}}
+];
+
+const achievements = [
+  {id:'first',name:'Erster Fund',desc:'1 Suche',check:s=>s.searches>=1},
+  {id:'hundred',name:'100 Suchen',desc:'100 Suchen',check:s=>s.searches>=100},
+  {id:'thousand',name:'1000 Suchen',desc:'1000 Suchen',check:s=>s.searches>=1000},
+  {id:'rare',name:'Selten',desc:'Seltenes Item',check:s=>hasRarity(s,3)},
+  {id:'epic',name:'Episch',desc:'Episches Item',check:s=>hasRarity(s,4)},
+  {id:'legend',name:'Legendär',desc:'Legendäres',check:s=>hasRarity(s,5)},
+  {id:'unique50',name:'50 Unique',desc:'50 verschiedene',check:s=>s.uniqueMap.size>=50},
+  {id:'level10',name:'Level 10',desc:'Level 10',check:s=>s.level>=10},
+  {id:'skills10',name:'10 Skills',desc:'10 Skills freigeschaltet',check:s=>s.unlockedSkills.length>=10}
+];
+
+const equipmentTemplates = [
+  {slot:'helm', name:'Lederhelm', rarity:1, luck:0.02, power:0},
+  {slot:'helm', name:'Eisenhelm', rarity:2, luck:0.04, power:0},
+  {slot:'helm', name:'Kristallhelm', rarity:4, luck:0.08, power:1},
+  {slot:'armor', name:'Lederrüstung', rarity:1, luck:0.01, power:0},
+  {slot:'armor', name:'Kettenrüstung', rarity:3, luck:0.05, power:0},
+  {slot:'armor', name:'Mythische Rüstung', rarity:6, luck:0.12, power:1},
+  {slot:'tool', name:'Einfache Schaufel', rarity:1, luck:0, power:1},
+  {slot:'tool', name:'Verzauberte Hacke', rarity:3, luck:0.03, power:2},
+  {slot:'tool', name:'Kosmische Sonde', rarity:7, luck:0.1, power:3},
+  {slot:'artifact', name:'Glücksamulett', rarity:2, luck:0.06, power:0},
+  {slot:'artifact', name:'Sternenfragment', rarity:5, luck:0.15, power:1},
+  {slot:'artifact', name:'Jenseits-Kern', rarity:10, luck:0.3, power:2}
+];
+
+let state = {
+  searches:0, items:[], uniqueMap:new Map(), autoInterval:null, autoOn:false,
+  level:1, xp:0, searchPower:1, currentBiome:'wald',
+  unlockedAchievements:[], lastOnline:Date.now(), dailyClaimed:null,
+  skillPoints:0, unlockedSkills:[],
+  activeEvent: null,
+  equipment: {helm:null, armor:null, tool:null, artifact:null},
+  activePotions: [], // {type, value, endsAt, name}
+  merchantOffers: [],
+  merchantLastRefresh: 0
+};
+
+function hasRarity(s,w){ for(const d of s.uniqueMap.values()) if(d.weight>=w) return true; return false; }
+function getSkillEffects(){
+  let e = {power:0, luck:0, xp:0, offline:0, unique:0, biome:0};
+  state.unlockedSkills.forEach(id=>{
+    const sk = skills.find(s=>s.id===id);
+    if(sk && sk.effect) Object.keys(sk.effect).forEach(k=> e[k]=(e[k]||0)+sk.effect[k]);
+  });
+  return e;
+}
+
+function getEquipmentBonuses(){
+  let luck=0, power=0;
+  Object.values(state.equipment).forEach(eq=>{
+    if(eq){ luck += eq.luck||0; power += eq.power||0; }
+  });
+  return {luck, power};
+}
+
+function getPotionBonuses(){
+  const now = Date.now();
+  state.activePotions = state.activePotions.filter(p => p.endsAt > now);
+  let luck=0, power=0;
+  state.activePotions.forEach(p=>{
+    if(p.type==='luck') luck += p.value;
+    if(p.type==='power') power += p.value;
+  });
+  return {luck, power};
+}
+
+function loadState(){
+  const saved = localStorage.getItem('infiniteCollection');
+  if(saved){
+    const d = JSON.parse(saved);
+    Object.assign(state,d);
+    state.uniqueMap = new Map(d.unique||[]);
+    state.unlockedAchievements = d.unlockedAchievements||[];
+    state.unlockedSkills = d.unlockedSkills||[];
+    state.equipment = d.equipment || {helm:null, armor:null, tool:null, artifact:null};
+    state.activePotions = d.activePotions || [];
+    state.merchantOffers = d.merchantOffers || [];
+    state.merchantLastRefresh = d.merchantLastRefresh || 0;
+    if(d.activeEvent && d.activeEvent.endsAt > Date.now()) state.activeEvent = d.activeEvent;
+    else state.activeEvent = null;
+  }
+  processOffline();
+  checkDaily();
+  refreshMerchantIfNeeded();
+  updateUI();
+  checkAchievements();
+  applyEventTheme();
+  renderEquipment();
+  updatePotionDisplay();
+}
+
+function saveState(){
+  const data = {...state, items:state.items.slice(-300), unique:Array.from(state.uniqueMap.entries()), lastOnline:Date.now()};
+  delete data.autoInterval;
+  localStorage.setItem('infiniteCollection', JSON.stringify(data));
+}
+
+function processOffline(){
+  const now=Date.now();
+  const elapsed = Math.min(now-(state.lastOnline||now), 16*3600*1000);
+  if(elapsed>60000 && state.searches>5){
+    const eff = getSkillEffects();
+    const mult = 1 + (eff.offline||0);
+    const off = Math.floor(elapsed/1800 * state.searchPower * mult);
+    if(off>0){
+      showNotification(`Offline: +${Math.min(off,800)} Suchen`);
+      for(let i=0;i<Math.min(off,800);i++) doSearch(false);
+    }
+  }
+  state.lastOnline=now;
+}
+
+function checkDaily(){
+  const today=new Date().toDateString();
+  if(state.dailyClaimed!==today){
+    state.xp += 40*state.level;
+    state.skillPoints += 1;
+    showNotification('Tägliche Belohnung: XP + 1 Skillpunkt!');
+    state.dailyClaimed=today;
+  }
+}
+
+function getActiveBiome(){
+  if(state.activeEvent && state.activeEvent.endsAt > Date.now()){
+    return biomes.find(b=>b.id===state.activeEvent.biomeId) || biomes[0];
+  }
+  return biomes[0];
+}
+
+function getLuck(){
+  const biome = getActiveBiome();
+  const eff = getSkillEffects();
+  const eq = getEquipmentBonuses();
+  const pot = getPotionBonuses();
+  return (1+(state.level-1)*0.025) * biome.rareBonus * (1+(eff.luck||0)) * (1+(eff.biome||0)) * (1 + eq.luck + pot.luck);
+}
+
+function getSearchPower(){
+  const eff = getSkillEffects();
+  const eq = getEquipmentBonuses();
+  const pot = getPotionBonuses();
+  return state.searchPower + (eff.power||0) + eq.power + pot.power;
+}
+
+function rollRarity(){
+  const luck=getLuck();
+  const roll=Math.random();
+  let cum=0;
+  for(const r of rarities){
+    let ch=r.chance;
+    if(r.weight>=4) ch*=luck;
+    cum+=ch;
+    if(roll<cum) return r;
+  }
+  return rarities[0];
+}
+
+function generateName(r){
+  const cat=categories[Math.floor(Math.random()*categories.length)];
+  const prefs = r.weight<=3?['Gewöhnlich','Einfach','Schlicht']:r.weight<=6?['Glänzend','Verzaubert','Selten']:r.weight<=9?['Antiker','Mythischer','Kosmisch']:['Der Letzte','Jenseits','Absolut'];
+  const bases=['Stein','Kristall','Relikt','Fragment','Essenz','Kern','Herz','Feder','Zahn','Amulett'];
+  const name = `${prefs[Math.floor(Math.random()*prefs.length)]} ${bases[Math.floor(Math.random()*bases.length)]}`;
+  return {name, category:cat};
+}
+
+function tryTriggerEvent(){
+  if(state.activeEvent && state.activeEvent.endsAt > Date.now()) return;
+  const eventChances = [
+    {id:'hoehle', chance:0.005},
+    {id:'ruinen', chance:0.0025},
+    {id:'berg', chance:0.0012},
+    {id:'void', chance:0.0002},
+    {id:'kosmos', chance:0.00005}
+  ];
+  for(const e of eventChances){
+    if(Math.random() < e.chance){
+      const chosen = biomes.find(b=>b.id===e.id);
+      const durations = [15000, 30000, 60000, 90000];
+      const duration = durations[Math.floor(Math.random() * durations.length)];
+      state.activeEvent = {biomeId: chosen.id, endsAt: Date.now() + duration};
+      showNotification(`🌟 Event gestartet: ${chosen.name}!`);
+      applyEventTheme();
+      return;
+    }
+  }
+}
+
+function applyEventTheme(){
+  const biome = getActiveBiome();
+  document.body.style.background = biome.theme || '#0d0d1a';
+  const banner = document.getElementById('event-banner');
+  if(state.activeEvent && state.activeEvent.endsAt > Date.now()){
+    const remaining = Math.max(0, Math.floor((state.activeEvent.endsAt - Date.now())/1000));
+    const min = Math.floor(remaining/60);
+    const sec = remaining%60;
+    banner.textContent = `${biome.name} aktiv! Noch ${min}:${sec.toString().padStart(2,'0')}`;
+    banner.classList.add('active');
+    document.getElementById('current-event').textContent = biome.name;
+  } else {
+    banner.classList.remove('active');
+    document.getElementById('current-event').textContent = 'Keins';
+    document.body.style.background = '#0d0d1a';
+    state.activeEvent = null;
+  }
+}
+
+function doSearch(notify=true){
+  tryTriggerEvent();
+  const times = getSearchPower();
+  const xpMult = 1 + (getSkillEffects().xp||0);
+  for(let t=0;t<times;t++){
+    state.searches++;
+    state.xp += (1+Math.floor(state.level/2)) * xpMult;
+    const rarity = rollRarity();
+    const gen = generateName(rarity);
+    const item = {name:gen.name, category:gen.category, rarity:rarity.name, color:rarity.color, weight:rarity.weight, timestamp:Date.now(), id:Math.random()};
+    state.items.unshift(item);
+    if(state.items.length>120) state.items.pop();
+    const key=item.name.toLowerCase();
+    if(state.uniqueMap.has(key)) state.uniqueMap.get(key).count++;
+    else state.uniqueMap.set(key,{count:1,rarity:rarity.name,color:rarity.color,weight:rarity.weight,name:item.name,category:gen.category});
+    if(notify && t===0) addRecentFind(item);
+    if(rarity.weight>=6 && notify) showNotification(`🌟 ${rarity.name}: ${item.name}`);
+  }
+  levelUpCheck();
+  checkAchievements();
+  updateUI();
+  saveState();
+  applyEventTheme();
+  updatePotionDisplay();
+}
+
+function levelUpCheck(){
+  const needed = state.level*80 + Math.pow(state.level,1.4)*15;
+  while(state.xp >= needed){
+    state.xp -= needed;
+    state.level++;
+    state.skillPoints++;
+    showNotification(`Level ${state.level}! +1 Skillpunkt`);
+  }
+}
+
+function checkAchievements(){
+  achievements.forEach(a=>{
+    if(!state.unlockedAchievements.includes(a.id) && a.check(state)){
+      state.unlockedAchievements.push(a.id);
+      showNotification(`🏆 ${a.name}`);
+    }
+  });
+}
+
+function addRecentFind(item){
+  const list=document.getElementById('recent-list');
+  const card=document.createElement('div');
+  card.className='find-card';
+  card.style.borderLeftColor=item.color;
+  card.innerHTML=`<div><div style="font-weight:600;color:${item.color}">${item.name}</div><div style="font-size:.8rem;color:var(--muted)">${item.category}</div></div><span class="rarity-badge" style="background:${item.color}22;color:${item.color};border:1px solid ${item.color}">${item.rarity}</span>`;
+  list.prepend(card);
+  while(list.children.length>5) list.removeChild(list.lastChild);
+}
+
+function updateUI(){
+  document.getElementById('total-searches').textContent=state.searches.toLocaleString('de-DE');
+  let tf=0, rw=0, rn='-', rc='#fff';
+  for(const d of state.uniqueMap.values()){ tf+=d.count; if(d.weight>rw){rw=d.weight;rn=d.rarity;rc=d.color;} }
+  document.getElementById('total-items').textContent=tf.toLocaleString('de-DE');
+  document.getElementById('unique-items').textContent=state.uniqueMap.size.toLocaleString('de-DE');
+  document.getElementById('rarest-item').textContent=rn;
+  document.getElementById('rarest-item').style.color=rc;
+  document.getElementById('player-level').textContent=state.level;
+  document.getElementById('luck-mult').textContent=getLuck().toFixed(2);
+  document.getElementById('search-power').textContent=getSearchPower();
+  document.getElementById('skill-points').textContent=state.skillPoints;
+  const needed=state.level*80 + Math.pow(state.level,1.4)*15;
+  document.getElementById('xp-display').textContent=Math.floor(state.xp);
+  document.getElementById('xp-bar').style.width=Math.min(100,(state.xp/needed)*100)+'%';
+}
+
+function showNotification(t){
+  const n=document.getElementById('notification');
+  n.textContent=t; n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'),3200);
+}
+
+function toggleAuto(){
+  state.autoOn=!state.autoOn;
+  const btn=document.getElementById('auto-btn');
+  if(state.autoOn){ btn.textContent='Auto-Suche: AN'; btn.classList.add('active'); state.autoInterval=setInterval(()=>doSearch(true),380); }
+  else { btn.textContent='Auto-Suche: AUS'; btn.classList.remove('active'); clearInterval(state.autoInterval); }
+}
+
+function renderSkills(){
+  const tree=document.getElementById('skill-tree');
+  tree.innerHTML='';
+  const branches=[...new Set(skills.map(s=>s.branch))];
+  branches.forEach(br=>{
+    const div=document.createElement('div');
+    div.style.cssText='background:#1a1a2e;border-radius:14px;padding:16px;min-width:220px;border:1px solid #2a2a44;';
+    div.innerHTML=`<h3 style="text-align:center;margin-bottom:12px;color:#a78bfa;">${br}</h3>`;
+    skills.filter(s=>s.branch===br).forEach(sk=>{
+      const unlocked=state.unlockedSkills.includes(sk.id);
+      const canBuy=!unlocked && state.skillPoints>=sk.cost && sk.req.every(r=>state.unlockedSkills.includes(r));
+      const node=document.createElement('div');
+      node.className='skill-node '+(unlocked?'unlocked':canBuy?'available':'locked');
+      node.innerHTML=`<strong>${sk.name}</strong><div style="font-size:.8rem;color:var(--muted);margin:4px 0;">${sk.desc}</div><div style="font-size:.75rem;color:#aaa;">Kosten: ${sk.cost} SP ${unlocked?'✅':''}</div>`;
+      if(canBuy) node.onclick=()=>{
+        state.skillPoints-=sk.cost;
+        state.unlockedSkills.push(sk.id);
+        showNotification(`Skill freigeschaltet: ${sk.name}`);
+        updateUI(); saveState(); renderSkills();
+      };
+      div.appendChild(node);
+    });
+    tree.appendChild(div);
+  });
+}
+
+function renderInventory(filter='all', search=''){
+  const grid=document.getElementById('inventory-grid');
+  grid.innerHTML='';
+  const items=Array.from(state.uniqueMap.values())
+    .filter(i=>(filter==='all'||i.rarity===filter) && i.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a,b)=>b.weight-a.weight||b.count-a.count);
+  if(!items.length){ grid.innerHTML='<p style="grid-column:1/-1;text-align:center;color:var(--muted);padding:40px;">Keine Items gefunden.</p>'; return; }
+  items.forEach(it=>{
+    const el=document.createElement('div');
+    el.className='card';
+    el.style.borderLeft=`4px solid ${it.color}`;
+    el.innerHTML=`<div style="font-weight:600;color:${it.color}">${it.name}</div><div style="font-size:.8rem;color:var(--muted);margin-top:4px;">${it.category||''} • ${it.rarity} • ${it.count}x</div>`;
+    grid.appendChild(el);
+  });
+}
+
+function renderFilters(){
+  const bar=document.getElementById('filter-bar');
+  bar.innerHTML='<button class="filter-btn active" data-f="all">Alle</button>';
+  rarities.forEach(r=>{
+    const b=document.createElement('button');
+    b.className='filter-btn';
+    b.dataset.f=r.name;
+    b.textContent=r.name;
+    b.onclick=()=>{renderInventory(r.name,document.getElementById('inv-search').value); document.querySelectorAll('.filter-btn').forEach(x=>x.classList.toggle('active',x.dataset.f===r.name));};
+    bar.appendChild(b);
+  });
+  bar.querySelector('[data-f="all"]').onclick=()=>{renderInventory('all',document.getElementById('inv-search').value); document.querySelectorAll('.filter-btn').forEach(x=>x.classList.toggle('active',x.dataset.f==='all'));};
+}
+
+function renderAchievements(){
+  const list=document.getElementById('ach-list');
+  list.innerHTML='';
+  achievements.forEach(a=>{
+    const un=state.unlockedAchievements.includes(a.id);
+    const el=document.createElement('div');
+    el.className='card';
+    el.style.opacity=un?1:0.55;
+    el.innerHTML=`<strong>${un?'✅':'🔒'} ${a.name}</strong><div style="font-size:.85rem;color:var(--muted);margin-top:6px;">${a.desc}</div>`;
+    list.appendChild(el);
+  });
+}
+
+function renderEvents(){
+  const status=document.getElementById('event-status');
+  const list=document.getElementById('bio-list');
+  list.innerHTML='';
+  if(state.activeEvent && state.activeEvent.endsAt > Date.now()){
+    const b = biomes.find(x=>x.id===state.activeEvent.biomeId);
+    const rem = Math.max(0, Math.floor((state.activeEvent.endsAt - Date.now())/1000));
+    status.innerHTML = `<strong>Aktives Event: ${b.name}</strong><div style="margin-top:6px;">Noch ${Math.floor(rem/60)}:${(rem%60).toString().padStart(2,'0')} • Bonus x${b.rareBonus}</div>`;
+  } else {
+    status.innerHTML = '<strong>Kein Event aktiv</strong><div style="margin-top:6px;color:var(--muted);">Events starten zufällig beim Suchen</div>';
+  }
+  biomes.forEach(b=>{
+    const el=document.createElement('div');
+    el.className='card';
+    el.innerHTML=`<strong>${b.name}</strong><div style="font-size:.85rem;color:var(--muted);margin-top:6px;">${b.desc}<br>Bonus: x${b.rareBonus}</div>`;
+    list.appendChild(el);
+  });
+}
+
+function renderEquipment(){
+  ['helm','armor','tool','artifact'].forEach(slot=>{
+    const el = document.getElementById('slot-'+slot);
+    const eq = state.equipment[slot];
+    if(eq){
+      el.classList.add('filled');
+      el.innerHTML = `<strong>${eq.name}</strong><br><small>+${(eq.luck*100).toFixed(0)}% Glück • +${eq.power} Power</small><br><small style="color:#aaa;">Klicken zum Ablegen</small>`;
+      el.onclick = ()=>{ state.equipment[slot]=null; saveState(); renderEquipment(); updateUI(); };
+    } else {
+      el.classList.remove('filled');
+      el.innerHTML = slot.charAt(0).toUpperCase()+slot.slice(1)+'<br><small>Klicken zum Anlegen</small>';
+      el.onclick = ()=> openEquipPicker(slot);
+    }
+  });
+}
+
+function openEquipPicker(slot){
+  const picker = document.getElementById('equip-picker');
+  picker.innerHTML = `<h3>Wähle ${slot}:</h3>`;
+  const available = equipmentTemplates.filter(e=>e.slot===slot);
+  // For demo we allow equipping templates directly; in full version check inventory
+  available.forEach(tmpl=>{
+    const btn = document.createElement('button');
+    btn.className = 'action';
+    btn.style.margin='6px';
+    btn.textContent = `${tmpl.name} (+${(tmpl.luck*100).toFixed(0)}% Glück)`;
+    btn.onclick = ()=>{
+      state.equipment[slot] = {...tmpl};
+      saveState();
+      renderEquipment();
+      updateUI();
+      picker.innerHTML = '';
+      showNotification(`${tmpl.name} angelegt!`);
+    };
+    picker.appendChild(btn);
+  });
+  const cancel = document.createElement('button');
+  cancel.className='action';
+  cancel.style.background='#2a2a44';
+  cancel.textContent='Abbrechen';
+  cancel.onclick=()=>picker.innerHTML='';
+  picker.appendChild(cancel);
+}
+
+function refreshMerchantIfNeeded(){
+  const now = Date.now();
+  const hour = 60*60*1000;
+  if(now - state.merchantLastRefresh > hour || state.merchantOffers.length === 0){
+    generateMerchantOffers();
+    state.merchantLastRefresh = now;
+  }
+}
+
+function generateMerchantOffers(){
+  state.merchantOffers = [];
+  // Always some potions
+  state.merchantOffers.push({
+    type:'potion', name:'Kleiner Glückstrank', desc:'+0.5 Glück für 30 Sekunden',
+    cost: {rarity:'Gewöhnlich', amount:5}, duration:30000, effect:{luck:0.5}
+  });
+  state.merchantOffers.push({
+    type:'potion', name:'Starker Glückstrank', desc:'+1.0 Glück für 45 Sekunden',
+    cost: {rarity:'Ungewöhnlich', amount:3}, duration:45000, effect:{luck:1.0}
+  });
+  state.merchantOffers.push({
+    type:'potion', name:'Power-Elixier', desc:'+2 Suchkraft für 20 Sekunden',
+    cost: {rarity:'Selten', amount:2}, duration:20000, effect:{power:2}
+  });
+  // Random gear offers
+  for(let i=0;i<3;i++){
+    const tmpl = equipmentTemplates[Math.floor(Math.random()*equipmentTemplates.length)];
+    const costAmount = 2 + tmpl.rarity * 2;
+    const costRarity = rarities[Math.min(tmpl.rarity, 5)].name;
+    state.merchantOffers.push({
+      type:'gear', name:tmpl.name, desc:`Anlegen möglich • +${(tmpl.luck*100).toFixed(0)}% Glück`,
+      cost: {rarity:costRarity, amount:costAmount}, gear:tmpl
+    });
+  }
+}
+
+function renderMerchant(){
+  refreshMerchantIfNeeded();
+  const info = document.getElementById('merchant-info');
+  const next = new Date(state.merchantLastRefresh + 60*60*1000);
+  info.innerHTML = `<strong>Angebot wechselt stündlich</strong><div style="margin-top:6px;color:var(--muted);">Nächstes Angebot: ${next.toLocaleTimeString('de-DE')}</div>`;
+  const cont = document.getElementById('merchant-offers');
+  cont.innerHTML = '';
+  state.merchantOffers.forEach((offer, idx)=>{
+    const el = document.createElement('div');
+    el.className = 'merchant-item';
+    const costText = `${offer.cost.amount}x ${offer.cost.rarity}`;
+    el.innerHTML = `<strong>${offer.name}</strong><div style="font-size:.85rem;color:var(--muted);margin:4px 0;">${offer.desc}</div><div style="font-size:.8rem;">Kosten: ${costText}</div>`;
+    const btn = document.createElement('button');
+    btn.className = 'action';
+    btn.style.marginTop='8px';
+    btn.textContent = 'Tauschen';
+    btn.onclick = ()=> buyOffer(idx);
+    el.appendChild(btn);
+    cont.appendChild(el);
+  });
+}
+
+function countItemsOfRarity(rarityName){
+  let c=0;
+  for(const d of state.uniqueMap.values()){
+    if(d.rarity === rarityName) c += d.count;
+  }
+  return c;
+}
+
+function spendItemsOfRarity(rarityName, amount){
+  let remaining = amount;
+  for(const [key, d] of state.uniqueMap.entries()){
+    if(d.rarity === rarityName && remaining>0){
+      const take = Math.min(d.count, remaining);
+      d.count -= take;
+      remaining -= take;
+      if(d.count<=0) state.uniqueMap.delete(key);
+    }
+  }
+  return remaining === 0;
+}
+
+function buyOffer(idx){
+  const offer = state.merchantOffers[idx];
+  if(!offer) return;
+  const have = countItemsOfRarity(offer.cost.rarity);
+  if(have < offer.cost.amount){
+    showNotification(`Nicht genug ${offer.cost.rarity} Items!`);
+    return;
+  }
+  if(!spendItemsOfRarity(offer.cost.rarity, offer.cost.amount)) return;
+  if(offer.type === 'potion'){
+    state.activePotions.push({
+      name: offer.name,
+      type: Object.keys(offer.effect)[0],
+      value: Object.values(offer.effect)[0],
+      endsAt: Date.now() + offer.duration
+    });
+    showNotification(`${offer.name} aktiviert!`);
+  } else if(offer.type === 'gear'){
+    // Add to "inventory" as equippable – for simplicity auto-equip or store
+    state.equipment[offer.gear.slot] = {...offer.gear};
+    showNotification(`${offer.name} erhalten und angelegt!`);
+    renderEquipment();
+  }
+  state.merchantOffers.splice(idx,1);
+  saveState();
+  updateUI();
+  updatePotionDisplay();
+  renderMerchant();
+}
+
+function updatePotionDisplay(){
+  const list = document.getElementById('potion-list');
+  list.innerHTML = '';
+  const now = Date.now();
+  state.activePotions = state.activePotions.filter(p=>p.endsAt>now);
+  state.activePotions.forEach(p=>{
+    const rem = Math.max(0, Math.floor((p.endsAt-now)/1000));
+    const el = document.createElement('div');
+    el.className = 'potion-banner';
+    el.textContent = `🧪 ${p.name}: noch ${rem}s`;
+    list.appendChild(el);
+  });
+}
+
+function exportSave(){
+  document.getElementById('export-box').value = btoa(JSON.stringify(localStorage.getItem('infiniteCollection')));
+}
+
+// Navigation
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-'+btn.dataset.page).classList.add('active');
+    if(btn.dataset.page==='inventory'){ renderFilters(); renderInventory(); }
+    if(btn.dataset.page==='skills') renderSkills();
+    if(btn.dataset.page==='achievements') renderAchievements();
+    if(btn.dataset.page==='events') renderEvents();
+    if(btn.dataset.page==='character') renderEquipment();
+    if(btn.dataset.page==='merchant') renderMerchant();
+  };
+});
+
+document.getElementById('search-btn').onclick=()=>doSearch(true);
+document.getElementById('auto-btn').onclick=toggleAuto;
+document.getElementById('inv-search').oninput=e=>renderInventory(document.querySelector('.filter-btn.active')?.dataset.f||'all',e.target.value);
+document.getElementById('reset-btn').onclick=()=>{if(confirm('Alles zurücksetzen?')){localStorage.removeItem('infiniteCollection');location.reload();}};
+document.addEventListener('keydown',e=>{if(e.code==='Space' && !e.repeat && document.activeElement.tagName!=='INPUT' && document.activeElement.tagName!=='TEXTAREA'){e.preventDefault();doSearch(true);}});
+
+setInterval(()=>{ applyEventTheme(); updatePotionDisplay(); }, 1000);
+
+loadState();
+console.log('Charakter + Händler + Tränke geladen!');
 </script>
 </body>
 </html>
